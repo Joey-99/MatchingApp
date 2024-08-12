@@ -28,7 +28,7 @@ delete_profile(): Remove a user profile and clean up associated data.
                 try:
                     age = int(age)
                     if age < 1 or age > 100:
-                        raise ValueError
+                        raise ValueError 
                     break
                 except Exception:
                     age = input("age Error, Please enter the age(1-100): ")
@@ -127,11 +127,21 @@ delete_profile(): Remove a user profile and clean up associated data.
                         value = int(value)
                         if value != 1 and value != 2:
                             raise ValueError
-                        break
+                        break 
                     except Exception:
                         value = input("gender Error, Please enter the gender (1 for male, 2 for female): ")
-            if key == 'location':
+            elif key == 'location':
                 value = input("Please enter the new location: ")
+
+            elif key == 'interests':
+                value = input("Please enter the interest(as a lists includes multiple str): ")
+                while True:
+                    try:
+                        if isinstance(value, list):
+                        break
+                    except Exception:
+                        value  = input("Please input the interest in the correct format as a list: ")
+                        
             # modify
             success = user.change(id, key, value)
             # check if the modify successfully
