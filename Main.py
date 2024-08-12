@@ -4,6 +4,13 @@ if __name__ == '__main__':
     # Instantiate the user object
     user = User()
     while True:
+        print("""
+exit(): Exit the registration module, performing necessary cleanup.
+create_users(): Register a new user, validating and storing their information.
+view_profiles(): Display a list of user profiles.
+edit_profile(): Modify an existing user's profile details.
+delete_profile(): Remove a user profile and clean up associated data.
+""")
         # receive input commands
         cmd = input("Please enter the command: ")
         # exit commands
