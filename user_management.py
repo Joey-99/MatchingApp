@@ -3,7 +3,7 @@ import json
 import os
 
 
-class User:
+class user_management:
 
     def __init__(self):
         self._list = None

@@ -1,8 +1,8 @@
-from User import User
+from user_management import user_management
 
 if __name__ == '__main__':
     # Instantiate the user object
-    user = User()
+    user = user_management()
     while True:
         # receive input commands
         cmd = input("Please enter the command: ")
