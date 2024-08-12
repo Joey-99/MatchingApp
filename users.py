@@ -1,7 +1,9 @@
 class User:
-    def __init__(self, user_id, name, age, gender, location, interests,
+    def __init__(self, username, password, user_id, name, age, gender, location, interests,
                  liked_users=[], disliked_users=[], matches=[]):
         self.user_id = user_id
+        self.username = username
+        self.password = password
         self.name = name
         self.age = age
         self.gender = gender
