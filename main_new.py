@@ -17,19 +17,31 @@ def get_user_age():
     return age
 
 def get_user_gender():
-    gender = input("Please enter your gender (M for male, F for female, O for other): ")
+    gender = input("Please enter your gender ('M' for male, 'F' for female, 'O' for other): ").upper()
     while True:
         try:
             if gender != 'M' and gender != 'F' and gender != 'O':
                 raise ValueError
             break
         except Exception:
-            gender = input("Gender error, please enter your gender (M for male, F for female, O for other): ")
+            gender = input("Gender error, please enter your gender ('M' for male, 'F' for female, 'O' for other): ").upper()
     return gender
 
 def get_user_location():
     location = input("Please enter your location: ")
     return location
+
+def get_preferred_genders():
+    gender_interest = input("Please enter which genders you are interested in (i.e. 'MF' for male and female, 'MFO' for all, and 'F' for just female): ").strip().upper()
+    while not set(gender_interest).issubset({'M', 'F', 'O'}) or len(gender_interest) != len(set(gender_interest)):
+        gender_interest = input("Invalid genders, please enter 'M' for male, 'F' for female, or 'O' for other: ").strip().upper()
+    return gender_interest
+
+def get_like_dislike():
+    like = input("Please enter whether you like or dislike this person ('like' or 'dislike' or 'exit'): ").lower()
+    while like != 'like' and like != 'dislike' and like != 'exit':
+        like = input("Invalid entry, please enter whether you like or dislike this person ('like' or 'dislike' or 'exit'): ").lower()
+    return like
 
 if __name__ == '__main__':
     # Instantiate the user object
@@ -58,8 +70,9 @@ if __name__ == '__main__':
             age = get_user_age()
             gender = get_user_gender()
             location = get_user_location()
+            preferred_genders = get_preferred_genders()
 
-            user1 = user.create_user(username, password, name, age, gender, location, [])
+            user1 = user.create_user(username, password, name, age, gender, location, [], preferred_genders)
             user.add_user_to_db(user1)
             logged_in = True
         
@@ -79,17 +92,30 @@ if __name__ == '__main__':
             print("Not a valid command, please try again.")
             continue
 
+        user_id = user.get_user_id(username)
+
         while logged_in:
             option = input("Please choose an option (browse_profiles OR view_matches OR edit_profile OR logout): ").lower()
             if option == 'logout':
                 logged_in = False
                 break
             elif option == 'browse_profiles':
-                # show the strongest matches for the particular user
-                None
+                interests = user.get_interests(user_id)
+                interests_shuffled = interests.sample(frac=1).reset_index(drop=True)
+                for other_user_id in interests_shuffled['user_id'].tolist():
+                    print(interests_shuffled[interests_shuffled['user_id'] == other_user_id])
+                    like = get_like_dislike()
+                    if like == 'exit':
+                        continue
+                    elif like == 'like':
+                        user.like_profile(user_id, other_user_id)
+                    elif like == 'dislike':
+                        user.dislike_profile(user_id, other_user_id)
+                print('You have viewed all profiles, please check again later for more.')
             elif option == 'view_matches':
-                # show all matches for the particular user
-                None
+                print('You have matched with the following users')
+                matches = user.evaluate_matches(user_id)
+                print(matches)
             elif option == 'edit_profile':
                 # show options for changing user profile fields (password, name, age, gender, location)
                 None
