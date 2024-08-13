@@ -102,16 +102,21 @@ if __name__ == '__main__':
             elif option == 'browse_profiles':
                 interests = user.get_interests(user_id)
                 interests_shuffled = interests.sample(frac=1).reset_index(drop=True)
+                exit = False
                 for other_user_id in interests_shuffled['user_id'].tolist():
+                    if exit:
+                        break
                     print(interests_shuffled[interests_shuffled['user_id'] == other_user_id])
                     like = get_like_dislike()
                     if like == 'exit':
+                        exit = True
                         continue
                     elif like == 'like':
                         user.like_profile(user_id, other_user_id)
                     elif like == 'dislike':
                         user.dislike_profile(user_id, other_user_id)
-                print('You have viewed all profiles, please check again later for more.')
+                if not exit:
+                    print('You have viewed all profiles, please check again later for more.')
             elif option == 'view_matches':
                 print('You have matched with the following users')
                 matches = user.evaluate_matches(user_id)
