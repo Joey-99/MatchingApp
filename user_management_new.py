@@ -192,6 +192,16 @@ class user_management_new:
         all_users = self.get_all_users()
         mutual_profiles = all_users[all_users['user_id'].isin(mutual)]
         return mutual_profiles
+    
+    def update_field(self, user_id, column_name, column_value):
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+        cursor.execute(f"""UPDATE users
+                       SET {column_name} = '{column_value}'
+                       WHERE user_id = {user_id}""")
+        conn.commit()
+        conn.close()
+        return True
 
 if __name__ == "__main__":
     user = user_management_new()
