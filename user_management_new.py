@@ -45,8 +45,10 @@ class user_management_new:
                        age INTEGER KEY,
                        gender TEXT KEY,
                        location TEXT KEY,
+                       interests TEXT KEY,
                        preferred_genders TEXT KEY,
-                       age_limit INTEGER KEY)""")
+                       age_low INTEGER KEY,
+                       age_high INTEGER KEY)""")
         
         conn.commit()
         conn.close()
@@ -84,22 +86,22 @@ class user_management_new:
         password = cursor.fetchone()[0]
         return password
 
-    def create_user(self, username, password, name, age, gender, location, interests, preferred_genders, age_limit):
-        user = User(username, password, self.curr_user_id, name, age, gender, location, interests, preferred_genders, age_limit)
+    def create_user(self, username, password, name, age, gender, location, interests, preferred_genders, age_low, age_high):
+        user = User(username, password, self.curr_user_id, name, age, gender, location, interests, preferred_genders, age_low, age_high)
         self.curr_user_id += 1
         print('Successfull created new user')
         return user
 
     def add_user_to_db(self, user):
-        print(user.username, user.password, user.user_id)
         valid = self.check_valid_username(user.username)
+        interests_string = ','.join(user.interests)
         
         if valid:
             conn = sqlite3.connect(self.db_file)
             cursor = conn.cursor()
-            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,preferred_genders,age_limit)
+            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,interests,preferred_genders,age_low,age_high)
                            VALUES({user.user_id}, '{user.username}', '{user.password}', '{user.name}', '{user.age}',
-                           '{user.gender}', '{user.location}', '{user.preferred_genders}', '{user.age_limit}')""")
+                           '{user.gender}', '{user.location}', '{interests_string}', '{user.preferred_genders}', '{user.age_low}', {user.age_high})""")
             conn.commit()
             conn.close()
             print('Successfully added user to db')
@@ -112,6 +114,8 @@ class user_management_new:
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
         cursor.execute(f"DELETE FROM users WHERE user_id = {user_id}")
+        cursor.execute(f"DELETE FROM likes WHERE user_id = {user_id} OR liked_user_id == {user_id}")
+        cursor.execute(f"DELETE FROM dislikes WHERE user_id = {user_id} OR disliked_user_id == {user_id}")
         conn.commit()
         conn.close()
         print('Successfully deleted user from db')
@@ -124,6 +128,7 @@ class user_management_new:
         cursor.execute(f"""SELECT user_id FROM users
                        WHERE username = '{username}'""")
         user_id = cursor.fetchone()[0]
+        conn.close()
         return user_id
     
     def get_preferred_genders(self, user_id):
@@ -133,16 +138,31 @@ class user_management_new:
         cursor.execute(f"""SELECT preferred_genders FROM users
                        WHERE user_id = '{user_id}'""")
         preferred_genders = cursor.fetchone()[0]
+        conn.close()
         return list(preferred_genders)
     
     def get_age_limit(self, user_id):
+        ## THIS FUNCTION NEEDS TO BE TESTED
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
 
-        cursor.execute(f"""SELECT age_limit FROM users
+        cursor.execute(f"""SELECT age_low, age_high FROM users
                        WHERE user_id = '{user_id}'""")
-        age_limit = cursor.fetchone()[0]
-        return age_limit
+        ages = cursor.fetchone()
+        age_low, age_high = ages[0], ages[1]
+        conn.close()
+        return age_low, age_high
+    
+    def get_interests(self, user_id):
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+
+        cursor.execute(f"""SELECT interests FROM users
+                       WHERE user_id = '{user_id}'""")
+        interests = cursor.fetchone()[0]
+        interests = interests.split(',')
+        conn.close()
+        return interests
     
     def get_liked_profiles(self, user_id):
         conn = sqlite3.connect(self.db_file)
@@ -175,7 +195,7 @@ class user_management_new:
         conn.close()
         return users
 
-    def get_interests(self, user_id):
+    def get_potentials(self, user_id):
         preferred_genders = self.get_preferred_genders(user_id)
         liked_profiles = self.get_liked_profiles(user_id)
         disliked_profiles = self.get_disliked_profiles(user_id)
@@ -212,12 +232,17 @@ class user_management_new:
         mutual_profiles = all_users[all_users['user_id'].isin(mutual)]
         return mutual_profiles
     
-    def update_field(self, user_id, column_name, column_value):
+    def update_field(self, user_id, column_name, column_value, col_type='str'):
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
-        cursor.execute(f"""UPDATE users
-                       SET {column_name} = '{column_value}'
-                       WHERE user_id = {user_id}""")
+        if col_type == 'str':
+            cursor.execute(f"""UPDATE users
+                        SET {column_name} = '{column_value}'
+                        WHERE user_id = {user_id}""")
+        elif col_type == 'int':
+            cursor.execute(f"""UPDATE users
+                        SET {column_name} = {column_value}
+                        WHERE user_id = {user_id}""")
         conn.commit()
         conn.close()
         return True
