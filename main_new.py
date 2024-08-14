@@ -38,6 +38,14 @@ def get_preferred_genders():
         gender_interest = input("Invalid genders, please enter 'M' for male, 'F' for female, or 'O' for other: ").strip().upper()
     return gender_interest
 
+def get_age_limit():
+    age_limit = input("Please enter the upper age limit you can accept (i.e. 30 for 30 years old, 50 for 50 years old, None for no age limit: ")
+    if age_limit == 'None':
+        return age_limit
+    while not age_limit.isdigit():
+        age_limit = input("Invalid age input, please enter the upper age limit you can accept (i.e. 30 for 30 years old, 50 for 50 years old, None for no age limit: ")
+    return age_limit
+
 def get_like_dislike():
     like = input("Please enter whether you like or dislike this person ('like' or 'dislike' or 'exit'): ").lower()
     while like != 'like' and like != 'dislike' and like != 'exit':
@@ -76,8 +84,9 @@ if __name__ == '__main__':
             gender = get_user_gender()
             location = get_user_location()
             preferred_genders = get_preferred_genders()
+            age_limit = get_age_limit()
 
-            user1 = user.create_user(username, password, name, age, gender, location, [], preferred_genders)
+            user1 = user.create_user(username, password, name, age, gender, location, [], preferred_genders, age_limit)
             user.add_user_to_db(user1)
             logged_in = True
         
@@ -102,7 +111,7 @@ if __name__ == '__main__':
         user_id = user.get_user_id(username)
 
         while logged_in:
-            option = input("Please choose an option (browse_profiles OR view_matches OR edit_profile OR logout): ").lower()
+            option = input("Please choose an option (browse_profiles OR view_matches OR edit_profile OR logout OR delete_profile): ").lower()
             if option == 'logout':
                 logged_in = False
                 break
@@ -128,6 +137,14 @@ if __name__ == '__main__':
                 print('You have matched with the following users')
                 matches = user.evaluate_matches(user_id)
                 print(matches)
+            elif option == 'delete_profile':
+                user.delete_user_from_db(user_id)
+                success_delete = user.check_valid_username(username)
+                if success_delete:
+                    logged_in = False
+                    break
+                else:
+                    continue
             elif option == 'edit_profile':
                 edit_option = input('Which profile field would you like to update (password, name, age, gender, location, preferred_genders): ')
                 while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'preferred_genders']:
