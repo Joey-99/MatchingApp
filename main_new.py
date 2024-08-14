@@ -1,3 +1,4 @@
+import GUI
 from user_management_new import user_management_new
 
 def get_user_name():
@@ -91,7 +92,9 @@ if __name__ == '__main__':
             while password != actual_password:
                 password = input("The password you entered is incorrect, please try again: ")
             logged_in = True
-
+        elif cmd == 'gui':
+            GUI.start()
+            continue
         else:
             print("Not a valid command, please try again.")
             continue
