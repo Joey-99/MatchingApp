@@ -1,3 +1,4 @@
+import GUI
 from user_management_new import user_management_new
 
 def get_user_name():
@@ -51,6 +52,12 @@ def get_like_dislike():
         like = input("Invalid entry, please enter whether you like or dislike this person ('like' or 'dislike' or 'exit'): ").lower()
     return like
 
+def get_password():
+    password = input("Please enter a password (minimum length of 5 characters): ")
+    while len(password) < 5:
+        password = input("Password must be a minumum of 5 characters: ")
+    return password
+
 if __name__ == '__main__':
     # Instantiate the user object
     user = user_management_new()
@@ -70,9 +77,8 @@ if __name__ == '__main__':
                 else:
                     username = input(f"The username '{username}' already exists, please try again (minimum length of 5 characters): ")
                     valid = user.check_valid_username(username)
-            password = input("Please enter a password (minimum length of 5 characters): ")
-            while len(password) < 5:
-                password = input("Password must be a minumum of 5 characters: ")
+            password = get_password()
+            
             name = get_user_name()
             age = get_user_age()
             gender = get_user_gender()
@@ -95,7 +101,9 @@ if __name__ == '__main__':
             while password != actual_password:
                 password = input("The password you entered is incorrect, please try again: ")
             logged_in = True
-
+        elif cmd == 'gui':
+            GUI.start()
+            continue
         else:
             print("Not a valid command, please try again.")
             continue
@@ -110,16 +118,21 @@ if __name__ == '__main__':
             elif option == 'browse_profiles':
                 interests = user.get_interests(user_id)
                 interests_shuffled = interests.sample(frac=1).reset_index(drop=True)
+                exit = False
                 for other_user_id in interests_shuffled['user_id'].tolist():
+                    if exit:
+                        break
                     print(interests_shuffled[interests_shuffled['user_id'] == other_user_id])
                     like = get_like_dislike()
                     if like == 'exit':
+                        exit = True
                         continue
                     elif like == 'like':
                         user.like_profile(user_id, other_user_id)
                     elif like == 'dislike':
                         user.dislike_profile(user_id, other_user_id)
-                print('You have viewed all profiles, please check again later for more.')
+                if not exit:
+                    print('You have viewed all profiles, please check again later for more.')
             elif option == 'view_matches':
                 print('You have matched with the following users')
                 matches = user.evaluate_matches(user_id)
@@ -133,5 +146,24 @@ if __name__ == '__main__':
                 else:
                     continue
             elif option == 'edit_profile':
-                # show options for changing user profile fields (password, name, age, gender, location)
-                None
+                edit_option = input('Which profile field would you like to update (password, name, age, gender, location, preferred_genders): ')
+                while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'preferred_genders']:
+                    edit_option = input('Invalid input, which profile field would you like to update (password, name, age, gender, location, preferred_genders): ')
+                if edit_option == 'password':
+                    new_password = get_password()
+                    user.update_field(user_id, edit_option, new_password)
+                elif edit_option == 'name':
+                    new_name = get_user_name()
+                    user.update_field(user_id, edit_option, new_name)
+                elif edit_option == 'age':
+                    new_age = get_user_age()
+                    user.update_field(user_id, edit_option, new_age)
+                elif edit_option == 'gender':
+                    new_gender = get_user_gender()
+                    user.update_field(user_id, edit_option, new_gender)
+                elif edit_option == 'location':
+                    new_location = get_user_location()
+                    user.update_field(user_id, edit_option, new_location)
+                elif edit_option == 'preferred_genders':
+                    new_pref_genders = get_preferred_genders()
+                    user.update_field(user_id, edit_option, new_pref_genders)
