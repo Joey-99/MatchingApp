@@ -18,7 +18,7 @@ class GUI:
         self.store = store
         self.user_id = None
         # self.user_id = 1
-        self.root.title('GUI')
+        self.root.title('Two-way Street')
         self.root.geometry(str(width) + "x" + str(height))
 
 
