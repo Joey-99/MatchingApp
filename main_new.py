@@ -156,12 +156,11 @@ if __name__ == '__main__':
                 break
             elif option == 'browse_profiles':
                 interests = user.get_potentials(user_id)
-                interests_shuffled = interests.sample(frac=1).reset_index(drop=True)
                 exit = False
-                for other_user_id in interests_shuffled['user_id'].tolist():
+                for other_user_id in interests['user_id'].tolist():
                     if exit:
                         break
-                    print(interests_shuffled[interests_shuffled['user_id'] == other_user_id][COLUMNS_TO_SHOW])
+                    print(interests[interests['user_id'] == other_user_id][COLUMNS_TO_SHOW])
                     like = get_like_dislike()
                     if like == 'exit':
                         exit = True
