@@ -61,6 +61,8 @@ class user_management_new:
                        gender TEXT KEY,
                        location TEXT KEY,
                        interests TEXT KEY,
+                       politics TEXT KEY,
+                       intentions TEXT KEY,
                        preferred_genders TEXT KEY,
                        age_low INTEGER KEY,
                        age_high INTEGER KEY)""")
@@ -111,12 +113,14 @@ class user_management_new:
         password = cursor.fetchone()[0]
         return password
 
-    def create_user(self, username, password, name, age, gender, location, interests, preferred_genders, age_low, age_high):
+    def create_user(self, username, password, name, age, gender, location, interests, politics, intentions,
+                    preferred_genders, age_low, age_high):
         '''
         Creates an instance of the user class
         Increments the current user id variable
         '''
-        user = User(username, password, self.curr_user_id, name, age, gender, location, interests, preferred_genders, age_low, age_high)
+        user = User(username, password, self.curr_user_id, name, age, gender, location, interests, politics, intentions,
+                    preferred_genders, age_low, age_high)
         self.curr_user_id += 1
         print('Successfull created new user')
         return user
@@ -133,9 +137,10 @@ class user_management_new:
         if valid:
             conn = sqlite3.connect(self.db_file)
             cursor = conn.cursor()
-            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,interests,preferred_genders,age_low,age_high)
+            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,interests,politics,intentions,preferred_genders,age_low,age_high)
                            VALUES({user.user_id}, '{user.username}', '{user.password}', '{user.name}', '{user.age}',
-                           '{user.gender}', '{user.location}', '{interests_string}', '{user.preferred_genders}', '{user.age_low}', {user.age_high})""")
+                           '{user.gender}', '{user.location}', '{interests_string}', '{user.politics}', '{user.intentions}',
+                           '{user.preferred_genders}', '{user.age_low}', {user.age_high})""")
             conn.commit()
             conn.close()
             print('Successfully added user to db')
