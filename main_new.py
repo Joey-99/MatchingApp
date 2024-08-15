@@ -1,12 +1,14 @@
 import GUI
 from user_management_new import user_management_new
 
+COLUMNS_TO_SHOW = ['name', 'age', 'gender', 'location']
+
 def get_user_name():
-    name = input("Please enter your name: ")
+    name = input("\nPlease enter your name: ")
     return name
 
 def get_user_age():
-    age = input("Please enter your age (1-100): ")
+    age = input("\nPlease enter your age (1-100): ")
     while True:
         try:
             age = int(age)
@@ -18,7 +20,7 @@ def get_user_age():
     return age
 
 def get_user_gender():
-    gender = input("Please enter your gender ('M' for male, 'F' for female, 'O' for other): ").upper()
+    gender = input("\nPlease enter your gender ('M' for male, 'F' for female, 'O' for other): ").upper()
     while True:
         try:
             if gender != 'M' and gender != 'F' and gender != 'O':
@@ -29,26 +31,45 @@ def get_user_gender():
     return gender
 
 def get_user_location():
-    location = input("Please enter your location: ")
+    location = input("\nPlease enter your location: ")
     return location
 
 def get_preferred_genders():
-    gender_interest = input("Please enter which genders you are interested in (i.e. 'MF' for male and female, 'MFO' for all, and 'F' for just female): ").strip().upper()
+    gender_interest = input("\nPlease enter which genders you are interested in (i.e. 'MF' for male and female, 'MFO' for all, and 'F' for just female): ").strip().upper()
     while not set(gender_interest).issubset({'M', 'F', 'O'}) or len(gender_interest) != len(set(gender_interest)):
-        gender_interest = input("Invalid genders, please enter 'M' for male, 'F' for female, or 'O' for other: ").strip().upper()
+        gender_interest = input("Invalid genders, please enter which genders you are interested in (i.e. 'MF' for male and female, 'MFO' for all, and 'F' for just female): ").strip().upper()
     return gender_interest
 
+def get_age_range():
+    while True:
+        age_range_input = input("\nPlease enter the ages you are interest in (e.g., 25-100): ")
+
+        try:
+            age_min, age_max = map(int, age_range_input.split('-'))
+            if 1 <= age_min <= 100 and 1 <= age_max <= 100 and age_min < age_max:
+                return age_min, age_max
+            else:
+                print("Error: Please ensure both numbers are between 1 and 100, and the first number is smaller than the second.")
+        except ValueError:
+            print("Error: Please enter the range in the correct format (e.g., 25-100).")
+
 def get_like_dislike():
-    like = input("Please enter whether you like or dislike this person ('like' or 'dislike' or 'exit'): ").lower()
+    like = input("\nPlease enter whether you like or dislike this person ('like' or 'dislike' or 'exit'): ").lower()
     while like != 'like' and like != 'dislike' and like != 'exit':
         like = input("Invalid entry, please enter whether you like or dislike this person ('like' or 'dislike' or 'exit'): ").lower()
     return like
 
 def get_password():
-    password = input("Please enter a password (minimum length of 5 characters): ")
+    password = input("\nPlease enter a password (minimum length of 5 characters): ")
     while len(password) < 5:
         password = input("Password must be a minumum of 5 characters: ")
     return password
+
+def get_user_interests():
+    interests = input("\nPlease enter your interests, separated by commas (e.g., swimming, reading, walking, soccer): ")
+    interests_list = [interest.strip() for interest in interests.split(',')]
+
+    return interests_list
 
 if __name__ == '__main__':
     # Instantiate the user object
@@ -57,11 +78,11 @@ if __name__ == '__main__':
     while True:
         # receive input commands
         logged_in = False
-        cmd = input("Please enter the command (login OR create_account): ").lower()
+        cmd = input("\nPlease enter the command (login OR create_account): ").lower()
         
         # exit commands
         if cmd == 'create_account':
-            username = input("Please enter a username (minimum length of 5 characters): ")
+            username = input("\nPlease enter a username (minimum length of 5 characters): ")
             valid = user.check_valid_username(username)
             while not valid or len(username) < 5:
                 if len(username) < 5:
@@ -75,22 +96,25 @@ if __name__ == '__main__':
             age = get_user_age()
             gender = get_user_gender()
             location = get_user_location()
+            interests = get_user_interests()
             preferred_genders = get_preferred_genders()
+            age_low, age_high = get_age_range()
 
-            user1 = user.create_user(username, password, name, age, gender, location, [], preferred_genders)
+            user1 = user.create_user(username, password, name, age, gender, location, interests, preferred_genders, age_low, age_high)
             user.add_user_to_db(user1)
+            print(f'\nWelcome {username}! :) Please select an option from the list below to get started:')
             logged_in = True
-        
         elif cmd == 'login':
-            username = input("Please enter your username: ")
+            username = input("\nPlease enter your username: ")
             user_exists = not user.check_valid_username(username)
             while not user_exists:
                 username = input(f"The username '{username}' does not exists, please try again: ")
                 user_exists = not user.check_valid_username(username)
             actual_password = user.get_user_password(username)
-            password = input("Enter your password: ")
+            password = input("\nEnter your password: ")
             while password != actual_password:
                 password = input("The password you entered is incorrect, please try again: ")
+            print(f'\nWelcome back {username}! :) Please select an option from the list below to get started:')
             logged_in = True
         elif cmd == 'gui':
             GUI.start()
@@ -102,18 +126,18 @@ if __name__ == '__main__':
         user_id = user.get_user_id(username)
 
         while logged_in:
-            option = input("Please choose an option (browse_profiles OR view_matches OR edit_profile OR logout): ").lower()
+            option = input("\nPlease choose an option (browse_profiles OR view_matches OR edit_profile OR logout OR delete_profile): ").lower()
             if option == 'logout':
                 logged_in = False
                 break
             elif option == 'browse_profiles':
-                interests = user.get_interests(user_id)
+                interests = user.get_potentials(user_id)
                 interests_shuffled = interests.sample(frac=1).reset_index(drop=True)
                 exit = False
                 for other_user_id in interests_shuffled['user_id'].tolist():
                     if exit:
                         break
-                    print(interests_shuffled[interests_shuffled['user_id'] == other_user_id])
+                    print(interests_shuffled[interests_shuffled['user_id'] == other_user_id][COLUMNS_TO_SHOW])
                     like = get_like_dislike()
                     if like == 'exit':
                         exit = True
@@ -123,14 +147,32 @@ if __name__ == '__main__':
                     elif like == 'dislike':
                         user.dislike_profile(user_id, other_user_id)
                 if not exit:
-                    print('You have viewed all profiles, please check again later for more.')
+                    print('\nYou have viewed all profiles, please check again later for more.')
             elif option == 'view_matches':
-                print('You have matched with the following users')
                 matches = user.evaluate_matches(user_id)
-                print(matches)
+                if len(matches) == 0:
+                    print('\nYou have no matches at this time, keep liking profiles :)')
+                else:
+                    print('\nYou have matched with the following users\n')
+                    print(matches[COLUMNS_TO_SHOW])
+            elif option == 'delete_profile':
+                sure = input('\nAre you sure you want to delete your profile (Y/N): ').upper()
+                while sure != 'Y' and sure != 'N':
+                    sure = input('Invalid input, are you sure you want to delete your profile (Y/N): ').upper()
+                if sure == 'Y':
+                    user.delete_user_from_db(user_id)
+                    success_delete = user.check_valid_username(username)
+                    print('We are sad to see you go :(')
+                    if success_delete:
+                        logged_in = False
+                        break
+                    else:
+                        continue
+                elif sure == 'N':
+                    continue
             elif option == 'edit_profile':
-                edit_option = input('Which profile field would you like to update (password, name, age, gender, location, preferred_genders): ')
-                while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'preferred_genders']:
+                edit_option = input('\nWhich profile field would you like to update (password, name, age, gender, location, preferred_genders, preferred_age, interests): ')
+                while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'preferred_genders', 'preferred_age', 'interests']:
                     edit_option = input('Invalid input, which profile field would you like to update (password, name, age, gender, location, preferred_genders): ')
                 if edit_option == 'password':
                     new_password = get_password()
@@ -140,7 +182,7 @@ if __name__ == '__main__':
                     user.update_field(user_id, edit_option, new_name)
                 elif edit_option == 'age':
                     new_age = get_user_age()
-                    user.update_field(user_id, edit_option, new_age)
+                    user.update_field(user_id, edit_option, new_age, 'int')
                 elif edit_option == 'gender':
                     new_gender = get_user_gender()
                     user.update_field(user_id, edit_option, new_gender)
@@ -150,3 +192,11 @@ if __name__ == '__main__':
                 elif edit_option == 'preferred_genders':
                     new_pref_genders = get_preferred_genders()
                     user.update_field(user_id, edit_option, new_pref_genders)
+                elif edit_option == 'preferred_age':
+                    new_age_min, new_age_max = get_age_range()
+                    user.update_field(user_id, 'age_low', new_age_min, 'int')
+                    user.update_field(user_id, 'age_high', new_age_max, 'int')
+                elif edit_option == 'interests':
+                    new_interests = get_user_interests()
+                    new_interests = ','.join(new_interests)
+                    user.update_field(user_id, edit_option, new_interests)
