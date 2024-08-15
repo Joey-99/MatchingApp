@@ -17,9 +17,9 @@ def generate_random_user_data():
         "music", "movies", "sports", "reading", "travel", "hiking", "cooking", "gaming", "gardening"
     ]
     locations = [
-        "New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio",
-        "San Diego", "Dallas", "San Jose", "Austin", "Jacksonville", "Fort Worth", "Columbus", "Charlotte",
-        "San Francisco", "Indianapolis", "Seattle", "Denver", "Washington D.C.", "Miami", "Atlanta", "Boston"
+        "New York, USA", "Los Angeles, USA", "Chicago, USA", "Houston, USA", "Phoenix, USA", "Philadelphia, USA", "San Antonio, USA",
+        "San Diego, USA", "Dallas, USA", "San Jose, USA", "Austin, USA", "Jacksonville, USA", "Fort Worth, USA", "Columbus, USA", "Charlotte, USA",
+        "San Francisco, USA", "Indianapolis, USA", "Seattle, USA", "Denver, USA", "Washington D.C., USA", "Miami, USA", "Atlanta, USA", "Boston, USA"
     ]
     genders = ['M', 'F', 'O']
     preferred_genders_options = ['M', 'F', 'O', 'MF', 'MFO', 'FO']
