@@ -30,6 +30,28 @@ def get_user_gender():
             gender = input("Gender error, please enter your gender ('M' for male, 'F' for female, 'O' for other): ").upper()
     return gender
 
+def get_political_view():
+    politics = input("\nPlease enter your political orientation ('L' for liberal, 'C' for conservative, 'N' for neutral): ").upper()
+    while True:
+        try:
+            if politics != 'L' and politics != 'C' and politics != 'N':
+                raise ValueError
+            break
+        except Exception:
+            politics = input("Political orientation error, please enter your political orientation ('L' for liberal, 'C' for conservative, 'N' for neutral): ").upper()
+    return politics
+
+def get_dating_intentions():
+    intentions = input("\nPlease enter your dating intentions ('S' for short-term, 'L' for long-term, 'C' for casual, 'LP' for life partner): ").upper()
+    while True:
+        try:
+            if intentions != 'S' and intentions != 'L' and intentions != 'C' and intentions != 'LP':
+                raise ValueError
+            break
+        except Exception:
+            intentions = input("Dating intentions error, please enter your dating intentions ('S' for short-term, 'L' for long-term, 'C' for casual, 'LP' for life partner): ").upper()
+    return intentions
+
 def get_user_location():
     location = input("\nPlease enter your location: ")
     return location
@@ -97,10 +119,12 @@ if __name__ == '__main__':
             gender = get_user_gender()
             location = get_user_location()
             interests = get_user_interests()
+            politics = get_political_view()
+            intentions = get_dating_intentions()
             preferred_genders = get_preferred_genders()
             age_low, age_high = get_age_range()
 
-            user1 = user.create_user(username, password, name, age, gender, location, interests, preferred_genders, age_low, age_high)
+            user1 = user.create_user(username, password, name, age, gender, location, interests, politics, intentions, preferred_genders, age_low, age_high)
             user.add_user_to_db(user1)
             print(f'\nWelcome {username}! :) Please select an option from the list below to get started:')
             logged_in = True
@@ -132,12 +156,11 @@ if __name__ == '__main__':
                 break
             elif option == 'browse_profiles':
                 interests = user.get_potentials(user_id)
-                interests_shuffled = interests.sample(frac=1).reset_index(drop=True)
                 exit = False
-                for other_user_id in interests_shuffled['user_id'].tolist():
+                for other_user_id in interests['user_id'].tolist():
                     if exit:
                         break
-                    print(interests_shuffled[interests_shuffled['user_id'] == other_user_id][COLUMNS_TO_SHOW])
+                    print(interests[interests['user_id'] == other_user_id][COLUMNS_TO_SHOW])
                     like = get_like_dislike()
                     if like == 'exit':
                         exit = True
@@ -171,8 +194,8 @@ if __name__ == '__main__':
                 elif sure == 'N':
                     continue
             elif option == 'edit_profile':
-                edit_option = input('\nWhich profile field would you like to update (password, name, age, gender, location, preferred_genders, preferred_age, interests): ')
-                while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'preferred_genders', 'preferred_age', 'interests']:
+                edit_option = input('\nWhich profile field would you like to update (password, name, age, gender, location, politics, intentions, interests, preferred_genders, preferred_age): ')
+                while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'preferred_genders', 'preferred_age', 'interests', 'politics', 'intentions']:
                     edit_option = input('Invalid input, which profile field would you like to update (password, name, age, gender, location, preferred_genders): ')
                 if edit_option == 'password':
                     new_password = get_password()
@@ -200,3 +223,9 @@ if __name__ == '__main__':
                     new_interests = get_user_interests()
                     new_interests = ','.join(new_interests)
                     user.update_field(user_id, edit_option, new_interests)
+                elif edit_option == 'politics':
+                    new_politics = get_political_view()
+                    user.update_field(user_id, edit_option, new_politics)
+                elif edit_option == 'intentions':
+                    new_intentions = get_dating_intentions()
+                    user.update_field(user_id, edit_option, new_intentions)

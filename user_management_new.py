@@ -1,7 +1,11 @@
 import sqlite3
 import os
 import pandas as pd
+import numpy as np
 from users import User
+from matching_helpers import *
+
+DEFAULT_WEIGHTS = np.array([5,5,5,5,5,5])
 
 class user_management_new:
     def __init__(self):
@@ -61,6 +65,8 @@ class user_management_new:
                        gender TEXT KEY,
                        location TEXT KEY,
                        interests TEXT KEY,
+                       politics TEXT KEY,
+                       intentions TEXT KEY,
                        preferred_genders TEXT KEY,
                        age_low INTEGER KEY,
                        age_high INTEGER KEY)""")
@@ -111,12 +117,14 @@ class user_management_new:
         password = cursor.fetchone()[0]
         return password
 
-    def create_user(self, username, password, name, age, gender, location, interests, preferred_genders, age_low, age_high):
+    def create_user(self, username, password, name, age, gender, location, interests, politics, intentions,
+                    preferred_genders, age_low, age_high):
         '''
         Creates an instance of the user class
         Increments the current user id variable
         '''
-        user = User(username, password, self.curr_user_id, name, age, gender, location, interests, preferred_genders, age_low, age_high)
+        user = User(username, password, self.curr_user_id, name, age, gender, location, interests, politics, intentions,
+                    preferred_genders, age_low, age_high)
         self.curr_user_id += 1
         print('Successfull created new user')
         return user
@@ -133,9 +141,10 @@ class user_management_new:
         if valid:
             conn = sqlite3.connect(self.db_file)
             cursor = conn.cursor()
-            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,interests,preferred_genders,age_low,age_high)
+            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,interests,politics,intentions,preferred_genders,age_low,age_high)
                            VALUES({user.user_id}, '{user.username}', '{user.password}', '{user.name}', '{user.age}',
-                           '{user.gender}', '{user.location}', '{interests_string}', '{user.preferred_genders}', '{user.age_low}', {user.age_high})""")
+                           '{user.gender}', '{user.location}', '{interests_string}', '{user.politics}', '{user.intentions}',
+                           '{user.preferred_genders}', '{user.age_low}', {user.age_high})""")
             conn.commit()
             conn.close()
             print('Successfully added user to db')
@@ -264,11 +273,36 @@ class user_management_new:
         preferred_genders = self.get_preferred_genders(user_id)
         liked_profiles = self.get_liked_profiles(user_id)
         disliked_profiles = self.get_disliked_profiles(user_id)
+        liked_us = self.get_admirers_profiles(user_id)
 
-        all_users = self.get_all_users()
+        all_users = self.get_all_users().copy()
+        all_users['interests'] = all_users['interests'].apply(lambda x: x.split(',') if x else [])
+        actual_user = all_users[all_users['user_id'] == user_id]
         all_users = all_users[all_users['user_id'] != user_id]
+
+        age_low = int(actual_user['age_low'].values[0])
+        age_high = int(actual_user['age_high'].values[0])
+        interests = set(actual_user['interests'].values[0])
+        location = actual_user['location'].values[0].lower()
+        politics = actual_user['politics'].values[0]
+        intention = actual_user['intentions'].values[0]
+        
         gender_filtered = all_users[all_users['gender'].isin(preferred_genders)]
         seen_filtered = gender_filtered[~gender_filtered['user_id'].isin(liked_profiles + disliked_profiles)]
+
+        seen_filtered['age_score'] = seen_filtered['age'].apply(lambda x: get_age_score(x, age_low, age_high))
+        seen_filtered['interest_score'] = seen_filtered['interests'].apply(lambda x: get_interests_score(x, interests))
+        seen_filtered['location_score'] = np.where(seen_filtered['location'].str.lower() == location, 1, 0)
+        seen_filtered['politics_score'] = np.where(seen_filtered['politics'] == politics, 1, 0)
+        seen_filtered['intention_score'] = np.where(seen_filtered['intentions'] == intention, 1, 0)
+        seen_filtered['liked_user'] = np.where(seen_filtered['user_id'].isin(liked_us), 1, 0)
+
+        all_scores = seen_filtered[['age_score', 'interest_score', 'location_score', 'politics_score', 'intention_score', 'liked_user']]
+        all_scores = np.array(all_scores)
+        weighted_score = all_scores @ (DEFAULT_WEIGHTS / np.sum(DEFAULT_WEIGHTS))
+        seen_filtered['weighted_score'] = weighted_score
+        seen_filtered = seen_filtered.sort_values(by='weighted_score', ascending=False)
+
         return seen_filtered
     
     def like_profile(self, user_id, other_user_id):
@@ -326,7 +360,4 @@ class user_management_new:
 
 if __name__ == "__main__":
     user = user_management_new()
-    user_id = user.get_user_id('armaan2')
-    print(user_id)
-    matches = user.evaluate_matches(user_id)
-    print(matches)
+    user.get_potentials(46)

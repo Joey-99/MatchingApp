@@ -17,12 +17,14 @@ def generate_random_user_data():
         "music", "movies", "sports", "reading", "travel", "hiking", "cooking", "gaming", "gardening"
     ]
     locations = [
-        "New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio",
-        "San Diego", "Dallas", "San Jose", "Austin", "Jacksonville", "Fort Worth", "Columbus", "Charlotte",
-        "San Francisco", "Indianapolis", "Seattle", "Denver", "Washington D.C.", "Miami", "Atlanta", "Boston"
+        "New York, USA", "Los Angeles, USA", "Chicago, USA", "Houston, USA", "Phoenix, USA", "Philadelphia, USA", "San Antonio, USA",
+        "San Diego, USA", "Dallas, USA", "San Jose, USA", "Austin, USA", "Jacksonville, USA", "Fort Worth, USA", "Columbus, USA", "Charlotte, USA",
+        "San Francisco, USA", "Indianapolis, USA", "Seattle, USA", "Denver, USA", "Washington D.C., USA", "Miami, USA", "Atlanta, USA", "Boston, USA"
     ]
     genders = ['M', 'F', 'O']
     preferred_genders_options = ['M', 'F', 'O', 'MF', 'MFO', 'FO']
+    politics = ['L', 'C', 'N']
+    intentions = ['S', 'L', 'C', 'LP']
 
     username = "user" + str(random.randint(1000, 9999))
     password = "pass" + str(random.randint(1000, 9999))
@@ -34,19 +36,21 @@ def generate_random_user_data():
     age_low = random.randint(18, age)
     age_high = random.randint(age, 70)
     user_interests = random.sample(interests, k=random.randint(1, 5))  # Choose 1-5 random interests
+    politic = random.choice(politics)
+    intention = random.choice(intentions)
 
-    return username, password, name, age, gender, location, preferred_genders, age_low, age_high, user_interests
+    return username, password, name, age, gender, location, preferred_genders, age_low, age_high, user_interests, politic, intention
 
 # Creating 200 user profiles
 created_count = 0
 for i in range(200):
-    username, password, name, age, gender, location, preferred_genders, age_low, age_high, user_interests = generate_random_user_data()
+    username, password, name, age, gender, location, preferred_genders, age_low, age_high, user_interests, politic, intention = generate_random_user_data()
     
     if not user_management.check_valid_username(username):
         print(f"Skipping duplicate username: {username}")
         continue
 
-    user_profile = user_management.create_user(username, password, name, age, gender, location, user_interests, preferred_genders, age_low, age_high)
+    user_profile = user_management.create_user(username, password, name, age, gender, location, user_interests, politic, intention, preferred_genders, age_low, age_high)
     user_management.add_user_to_db(user_profile)
     
     created_count += 1
