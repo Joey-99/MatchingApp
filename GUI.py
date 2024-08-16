@@ -154,6 +154,8 @@ class LikeAndDislike:
 
         users = []
         for index, user in self.gui.store.get_all_users().iterrows():
+            if int(user['user_id']) == self.gui.user_id:
+                continue
             users.append(user)
 
         if len(users) == 0 or len(users) < (self.index + 1 + 1):
@@ -240,6 +242,9 @@ class LikeAndDislike:
 
 class Register:
     def __init__(self, gui: GUI):
+        self.political_orientation_input = None
+        self.dating_orientation_input = None
+        self.interests_input = None
         self.preferred_gender_m_input = None
         self.preferred_gender_f_input = None
         self.preferred_gender_o_input = None
@@ -261,70 +266,70 @@ class Register:
 
         username = tkinter.Label(self.page, text="Username")
         username.place(
-            width=100,
+            width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.1
+            y=height * 0
         )
         self.username_input = tkinter.Entry(self.page)
         self.username_input.place(
             width=width * 0.3,
             height=30,
             x=width * 0.4,
-            y=height * 0.1
+            y=height * 0
         )
 
         password = tkinter.Label(self.page, text="Password")
         password.place(
-            width=100,
+            width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.2
+            y=height * 0.06
         )
         self.password_input = tkinter.Entry(self.page)
         self.password_input.place(
             width=width * 0.3,
             height=30,
             x=width * 0.4,
-            y=height * 0.2
+            y=height * 0.06
         )
 
         name = tkinter.Label(self.page, text="Name")
         name.place(
-            width=100,
+            width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.3
+            y=height * 0.12
         )
         self.name_input = tkinter.Entry(self.page)
         self.name_input.place(
             width=width * 0.3,
             height=30,
             x=width * 0.4,
-            y=height * 0.3
+            y=height * 0.12
         )
 
         age = tkinter.Label(self.page, text="Age")
         age.place(
-            width=100,
+            width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.4
+            y=height * 0.18
         )
         self.age_input = tkinter.Entry(self.page)
         self.age_input.place(
             width=width * 0.3,
             height=30,
             x=width * 0.4,
-            y=height * 0.4
+            y=height * 0.18
         )
 
         gender = tkinter.Label(self.page, text="Gender")
         gender.place(
-            width=100,
+            width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.5
+            y=height * 0.24
         )
 
         self.gender_input = tkinter.StringVar()
@@ -338,7 +343,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.4,
-            y=height * 0.5
+            y=height * 0.24
         )
         female_radio = tkinter.Radiobutton(
             self.page,
@@ -350,7 +355,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.5,
-            y=height * 0.5
+            y=height * 0.24
         )
         other_radio = tkinter.Radiobutton(
             self.page,
@@ -362,60 +367,60 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.6,
-            y=height * 0.5
+            y=height * 0.24
         )
         other_radio.select()
 
         location = tkinter.Label(self.page, text="Location")
         location.place(
-            width=100,
+            width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.6
+            y=height * 0.3
         )
         self.location_input = tkinter.Entry(self.page)
         self.location_input.place(
             width=width * 0.3,
             height=30,
             x=width * 0.4,
-            y=height * 0.6
+            y=height * 0.3
         )
 
         preferred_age = tkinter.Label(self.page, text="Preferred Age")
         preferred_age.place(
-            width=100,
+            width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.7
+            y=height * 0.36
         )
         self.preferred_age_low_input = tkinter.Entry(self.page)
         self.preferred_age_low_input.place(
             width=width * 0.1,
             height=30,
             x=width * 0.4,
-            y=height * 0.7
+            y=height * 0.36
         )
         preferred_age_ = tkinter.Label(self.page, text="-")
         preferred_age_.place(
             width=20,
             height=30,
             x=width * 0.55 - 10,
-            y=height * 0.7
+            y=height * 0.36
         )
         self.preferred_age_high_input = tkinter.Entry(self.page)
         self.preferred_age_high_input.place(
             width=width * 0.1,
             height=30,
             x=width * 0.6,
-            y=height * 0.7
+            y=height * 0.36
         )
 
         preferred_gender = tkinter.Label(self.page, text="Preferred Gender")
         preferred_gender.place(
-            width=100,
+            width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.8
+            y=height * 0.42
         )
 
         self.preferred_gender_m_input = tkinter.IntVar()
@@ -428,7 +433,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.4,
-            y=height * 0.8
+            y=height * 0.42
         )
         self.preferred_gender_f_input = tkinter.IntVar()
         preferred_gender_f_input = tkinter.Checkbutton(
@@ -440,7 +445,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.5,
-            y=height * 0.8
+            y=height * 0.42
         )
         self.preferred_gender_o_input = tkinter.IntVar()
         preferred_gender_o_input = tkinter.Checkbutton(
@@ -452,8 +457,115 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.6,
-            y=height * 0.8
+            y=height * 0.42
         )
+
+        interests = tkinter.Label(self.page, text="Interests")
+        interests.place(
+            width=150,
+            height=30,
+            x=width * 0.2,
+            y=height * 0.48
+        )
+        self.interests_input = tkinter.Entry(self.page)
+        self.interests_input.place(
+            width=width * 0.3,
+            height=30,
+            x=width * 0.4,
+            y=height * 0.48
+        )
+
+        political_orientation = tkinter.Label(self.page, text="Political orientation")
+        political_orientation.place(
+            width=150,
+            height=30,
+            x=width * 0.2,
+            y=height * 0.54
+        )
+        self.political_orientation_input = tkinter.StringVar()
+        political_orientation_input_l_radio = tkinter.Radiobutton(
+            self.page,
+            text="Liberal",
+            variable=self.political_orientation_input,
+            value="L"
+        )
+        political_orientation_input_l_radio.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.4,
+            y=height * 0.54
+        )
+        political_orientation_input_c_radio = tkinter.Radiobutton(
+            self.page,
+            text="Conservative",
+            variable=self.political_orientation_input,
+            value="C"
+        )
+        political_orientation_input_c_radio.place(
+            width=width * 0.15,
+            height=30,
+            x=width * 0.5,
+            y=height * 0.54
+        )
+        political_orientation_input_n_radio = tkinter.Radiobutton(
+            self.page,
+            text="Neutral",
+            variable=self.political_orientation_input,
+            value="N"
+        )
+        political_orientation_input_n_radio.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.65,
+            y=height * 0.54
+        )
+        political_orientation_input_n_radio.select()
+
+        dating_orientation = tkinter.Label(self.page, text="Dating orientation")
+        dating_orientation.place(
+            width=150,
+            height=30,
+            x=width * 0.2,
+            y=height * 0.6
+        )
+        self.dating_orientation_input = tkinter.StringVar()
+        dating_orientation_input_l_radio = tkinter.Radiobutton(
+            self.page,
+            text="Long-term",
+            variable=self.dating_orientation_input,
+            value="L"
+        )
+        dating_orientation_input_l_radio.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.4,
+            y=height * 0.6
+        )
+        dating_orientation_input_c_radio = tkinter.Radiobutton(
+            self.page,
+            text="Casual",
+            variable=self.dating_orientation_input,
+            value="C"
+        )
+        dating_orientation_input_c_radio.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.5,
+            y=height * 0.6
+        )
+        dating_orientation_input_lp_radio = tkinter.Radiobutton(
+            self.page,
+            text="Life partner",
+            variable=self.dating_orientation_input,
+            value="LP"
+        )
+        dating_orientation_input_lp_radio.place(
+            width=width * 0.15,
+            height=30,
+            x=width * 0.6,
+            y=height * 0.6
+        )
+        dating_orientation_input_lp_radio.select()
 
         submit_btn = tkinter.Button(
             self.page,
@@ -500,6 +612,15 @@ class Register:
             return
         if self.preferred_gender_o_input is None:
             messagebox.showerror("ERROR", "preferred gender is None")
+            return
+        if self.interests_input is None:
+            messagebox.showerror("ERROR", "interests is None")
+            return
+        if self.political_orientation_input is None:
+            messagebox.showerror("ERROR", "preferred orientation is None")
+            return
+        if self.dating_orientation_input is None:
+            messagebox.showerror("ERROR", "dating orientation is None")
             return
 
         if self.username_input.get().strip() == "":
@@ -567,6 +688,16 @@ class Register:
         if (self.preferred_gender_o_input.get() == 1):
             preferred_gender = preferred_gender + 'O'
 
+        if self.interests_input.get().strip() == '':
+            messagebox.showerror("ERROR", "interests is Empty")
+            return
+        if self.political_orientation_input.get().strip() == '':
+            messagebox.showerror("ERROR", "preferred orientation is Empty")
+            return
+        if self.dating_orientation_input.get().strip() == '':
+            messagebox.showerror("ERROR", "dating orientation is Empty")
+            return
+
         user: User = self.gui.store.create_user(
             self.username_input.get().strip(),
             self.password_input.get().strip(),
@@ -574,7 +705,9 @@ class Register:
             int(self.age_input.get().strip()),
             self.gender_input.get().strip(),
             self.location_input.get().strip(),
-            [],
+            self.interests_input.get().strip().split(','),
+            self.political_orientation_input.get().strip(),
+            self.dating_orientation_input.get().strip(),
             preferred_gender,
             int(self.preferred_age_low_input.get().strip()),
             int(self.preferred_age_high_input.get().strip())
@@ -632,7 +765,7 @@ class Home:
 
         show_like_dislike_btn = tkinter.Button(
             self.page,
-            text="See Who Like Or Dislike Me",
+            text="See matchs",
             command=self.show_like_dislike
         )
         show_like_dislike_btn.place(
@@ -712,29 +845,37 @@ class Home:
     #         self.gui.store.like_profile(user_id, self.gui.user_id)
 
     def show_like_dislike(self):
-        like_userids = self.gui.store.get_liked_profiles(self.gui.user_id)
-        like_str = "liked:"
+        like_userids = self.gui.store.evaluate_matches(self.gui.user_id)
+        msg = 'user_id is '
         fist = True
-        for userid in like_userids:
+        for index, user in like_userids.iterrows():
             if fist is True:
                 fist = False
             else:
-                like_str = like_str + ", "
-            like_str = like_str + str(userid)
+                msg = msg + ", "
+            msg = msg + str(user['user_id'])
+        # like_str = "liked:"
+        # fist = True
+        # for userid in like_userids:
+        #     if fist is True:
+        #         fist = False
+        #     else:
+        #         like_str = like_str + ", "
+        #     like_str = like_str + str(userid)
+        # if fist is True:
+        #     like_str = like_str + "Empty"
+        # dislike_userids = self.gui.store.get_disliked_profiles(self.gui.user_id)
+        # dislike_str = "disliked:"
+        # fist = True
+        # for userid in dislike_userids:
+        #     if fist is True:
+        #         fist = False
+        #     else:
+        #         dislike_str = dislike_str + ", "
+        #     dislike_str = dislike_str + str(userid)
         if fist is True:
-            like_str = like_str + "Empty"
-        dislike_userids = self.gui.store.get_disliked_profiles(self.gui.user_id)
-        dislike_str = "disliked:"
-        fist = True
-        for userid in dislike_userids:
-            if fist is True:
-                fist = False
-            else:
-                dislike_str = dislike_str + ", "
-            dislike_str = dislike_str + str(userid)
-        if fist is True:
-            dislike_str = dislike_str + "Empty"
-        messagebox.showinfo("Like and Dislike List", like_str + "\n" + dislike_str)
+            msg = "Empty"
+        messagebox.showinfo("See matchs", msg)
 
     # def dislike(self):
     #     selected_items = self.treeview.selection()
