@@ -1,7 +1,7 @@
 import GUI
 from user_management_new import user_management_new
 
-COLUMNS_TO_SHOW = ['name', 'age', 'gender', 'location']
+COLUMNS_TO_SHOW = ['name', 'age', 'gender', 'location', "interests"]
 
 def get_user_name():
     name = input("\nPlease enter your name: ")
@@ -56,6 +56,12 @@ def get_user_location():
     location = input("\nPlease enter your location: ")
     return location
 
+def get_user_education_level():
+    education = input("\nPlease enter your education level as following ['highschool', 'bachelor', 'master', 'phd']: ").strip(",._ ").lower()
+    while education not in ['highschool', 'bachelor', 'master', 'phd']:
+        education = input("Invalid education level, please enter your education level as following ['highschool', 'bachelor', 'master', 'phd']: ").strip(",._ ").lower()
+    return education
+
 def get_preferred_genders():
     gender_interest = input("\nPlease enter which genders you are interested in (i.e. 'MF' for male and female, 'MFO' for all, and 'F' for just female): ").strip().upper()
     while not set(gender_interest).issubset({'M', 'F', 'O'}) or len(gender_interest) != len(set(gender_interest)):
@@ -93,6 +99,22 @@ def get_user_interests():
 
     return interests_list
 
+def get_user_interests():
+    Selecting = True
+    interests_list = []
+
+    while Selecting:
+        interest = input("""\nPlease choosing interests from the following options, select one at a time, type done to finish selection [
+        "music", "movies", "sports", "reading", "travel", "hiking", "cooking", "gaming", "gardening"]: """).strip(",._ ").lower()
+        if interest.lower() == 'done':
+            Selecting = False
+            continue
+        while  interest.lower() not in ["music", "movies", "sports", "reading", "travel", "hiking", "cooking", "gaming", "gardening"]:
+            interest = input("Invalid interest, please choose from the following options: ").strip(",._ ").lower()
+        interests_list.append(interest)
+        
+    return interests_list
+
 if __name__ == '__main__':
     # Instantiate the user object
     user = user_management_new()
@@ -118,13 +140,14 @@ if __name__ == '__main__':
             age = get_user_age()
             gender = get_user_gender()
             location = get_user_location()
+            education = get_user_education_level()
             interests = get_user_interests()
             politics = get_political_view()
             intentions = get_dating_intentions()
             preferred_genders = get_preferred_genders()
             age_low, age_high = get_age_range()
 
-            user1 = user.create_user(username, password, name, age, gender, location, interests, politics, intentions, preferred_genders, age_low, age_high)
+            user1 = user.create_user(username, password, name, age, gender, location, education, interests, politics, intentions, preferred_genders, age_low, age_high)
             user.add_user_to_db(user1)
             print(f'\nWelcome {username}! :) Please select an option from the list below to get started:')
             logged_in = True
@@ -195,7 +218,7 @@ if __name__ == '__main__':
                     continue
             elif option == 'edit_profile':
                 edit_option = input('\nWhich profile field would you like to update (password, name, age, gender, location, politics, intentions, interests, preferred_genders, preferred_age): ')
-                while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'preferred_genders', 'preferred_age', 'interests', 'politics', 'intentions']:
+                while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'education', 'preferred_genders', 'preferred_age', 'interests', 'politics', 'intentions']:
                     edit_option = input('Invalid input, which profile field would you like to update (password, name, age, gender, location, preferred_genders): ')
                 if edit_option == 'password':
                     new_password = get_password()
@@ -212,6 +235,9 @@ if __name__ == '__main__':
                 elif edit_option == 'location':
                     new_location = get_user_location()
                     user.update_field(user_id, edit_option, new_location)
+                elif edit_option == 'education':
+                    new_education = get_user_education_level()
+                    user.update_field(user_id, edit_option, new_education)
                 elif edit_option == 'preferred_genders':
                     new_pref_genders = get_preferred_genders()
                     user.update_field(user_id, edit_option, new_pref_genders)

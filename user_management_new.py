@@ -5,7 +5,7 @@ import numpy as np
 from users import User
 from matching_helpers import *
 
-DEFAULT_WEIGHTS = np.array([5,5,5,5,5,5])
+DEFAULT_WEIGHTS = np.array([5,5,5,5,5,5,5])
 
 class user_management_new:
     def __init__(self):
@@ -64,6 +64,7 @@ class user_management_new:
                        age INTEGER KEY,
                        gender TEXT KEY,
                        location TEXT KEY,
+                       education TEXT KEY,
                        interests TEXT KEY,
                        politics TEXT KEY,
                        intentions TEXT KEY,
@@ -117,13 +118,13 @@ class user_management_new:
         password = cursor.fetchone()[0]
         return password
 
-    def create_user(self, username, password, name, age, gender, location, interests, politics, intentions,
+    def create_user(self, username, password, name, age, gender, location, education, interests, politics, intentions,
                     preferred_genders, age_low, age_high):
         '''
         Creates an instance of the user class
         Increments the current user id variable
         '''
-        user = User(username, password, self.curr_user_id, name, age, gender, location, interests, politics, intentions,
+        user = User(username, password, self.curr_user_id, name, age, gender, location, education, interests, politics, intentions,
                     preferred_genders, age_low, age_high)
         self.curr_user_id += 1
         print('Successfull created new user')
@@ -141,9 +142,9 @@ class user_management_new:
         if valid:
             conn = sqlite3.connect(self.db_file)
             cursor = conn.cursor()
-            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,interests,politics,intentions,preferred_genders,age_low,age_high)
+            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,education,interests,politics,intentions,preferred_genders,age_low,age_high)
                            VALUES({user.user_id}, '{user.username}', '{user.password}', '{user.name}', '{user.age}',
-                           '{user.gender}', '{user.location}', '{interests_string}', '{user.politics}', '{user.intentions}',
+                           '{user.gender}', '{user.location}', '{user.education}', '{interests_string}', '{user.politics}', '{user.intentions}',
                            '{user.preferred_genders}', '{user.age_low}', {user.age_high})""")
             conn.commit()
             conn.close()
@@ -284,6 +285,7 @@ class user_management_new:
         age_high = int(actual_user['age_high'].values[0])
         interests = set(actual_user['interests'].values[0])
         location = actual_user['location'].values[0].lower()
+        education = actual_user['education'].values[0]
         politics = actual_user['politics'].values[0]
         intention = actual_user['intentions'].values[0]
         
@@ -293,11 +295,12 @@ class user_management_new:
         seen_filtered['age_score'] = seen_filtered['age'].apply(lambda x: get_age_score(x, age_low, age_high))
         seen_filtered['interest_score'] = seen_filtered['interests'].apply(lambda x: get_interests_score(x, interests))
         seen_filtered['location_score'] = np.where(seen_filtered['location'].str.lower() == location, 1, 0)
+        seen_filtered['education_score'] = np.where(seen_filtered['education'] == education, 1, 0)
         seen_filtered['politics_score'] = np.where(seen_filtered['politics'] == politics, 1, 0)
         seen_filtered['intention_score'] = np.where(seen_filtered['intentions'] == intention, 1, 0)
         seen_filtered['liked_user'] = np.where(seen_filtered['user_id'].isin(liked_us), 1, 0)
 
-        all_scores = seen_filtered[['age_score', 'interest_score', 'location_score', 'politics_score', 'intention_score', 'liked_user']]
+        all_scores = seen_filtered[['age_score', 'interest_score', 'location_score', 'education_score', 'politics_score', 'intention_score', 'liked_user']]
         all_scores = np.array(all_scores)
         weighted_score = all_scores @ (DEFAULT_WEIGHTS / np.sum(DEFAULT_WEIGHTS))
         seen_filtered['weighted_score'] = weighted_score
@@ -358,6 +361,8 @@ class user_management_new:
         conn.close()
         return True
 
+
+#Test the get_potentials function
 if __name__ == "__main__":
     user = user_management_new()
     user.get_potentials(46)

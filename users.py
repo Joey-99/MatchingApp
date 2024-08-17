@@ -1,5 +1,5 @@
 class User:
-    def __init__(self, username, password, user_id, name, age, gender, location, interests, politics, intentions,
+    def __init__(self, username, password, user_id, name, age, gender, location,education, interests, politics, intentions,
                  preferred_genders, age_low, age_high):
         self.user_id = user_id
         self.username = username
@@ -8,6 +8,7 @@ class User:
         self.age = age
         self.gender = gender
         self.location = location
+        self.education = education
         self.interests = interests
         self.politics = politics
         self.intentions = intentions
