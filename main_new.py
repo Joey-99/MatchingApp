@@ -93,11 +93,11 @@ def get_password():
         password = input("Password must be a minumum of 5 characters: ")
     return password
 
-def get_user_interests():
-    interests = input("\nPlease enter your interests, separated by commas (e.g., swimming, reading, walking, soccer): ")
-    interests_list = [interest.strip() for interest in interests.split(',')]
+# def get_user_interests():
+#     interests = input("\nPlease enter your interests, separated by commas (e.g., swimming, reading, walking, soccer): ")
+#     interests_list = [interest.strip() for interest in interests.split(',')]
 
-    return interests_list
+#     return interests_list
 
 def get_user_interests():
     Selecting = True
