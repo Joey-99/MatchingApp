@@ -70,7 +70,8 @@ class user_management_new:
                        intentions TEXT KEY,
                        preferred_genders TEXT KEY,
                        age_low INTEGER KEY,
-                       age_high INTEGER KEY)""")
+                       age_high INTEGER KEY,
+                       weights TEXT KEY)""")
         
         conn.commit()
         conn.close()
@@ -119,13 +120,13 @@ class user_management_new:
         return password
 
     def create_user(self, username, password, name, age, gender, location, education, interests, politics, intentions,
-                    preferred_genders, age_low, age_high):
+                    preferred_genders, age_low, age_high, weights):
         '''
         Creates an instance of the user class
         Increments the current user id variable
         '''
         user = User(username, password, self.curr_user_id, name, age, gender, location, education, interests, politics, intentions,
-                    preferred_genders, age_low, age_high)
+                    preferred_genders, age_low, age_high, weights)
         self.curr_user_id += 1
         print('Successfull created new user')
         return user
@@ -138,14 +139,15 @@ class user_management_new:
         '''
         valid = self.check_valid_username(user.username)
         interests_string = ','.join(user.interests)
+        weights_string = ','.join(map(str, user.weights))
         
         if valid:
             conn = sqlite3.connect(self.db_file)
             cursor = conn.cursor()
-            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,education,interests,politics,intentions,preferred_genders,age_low,age_high)
-                           VALUES({user.user_id}, '{user.username}', '{user.password}', '{user.name}', '{user.age}',
+            cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,education,interests,politics,intentions,preferred_genders,age_low,age_high,weights)
+                           VALUES({user.user_id}, '{user.username}', '{user.password}', '{user.name}', {user.age},
                            '{user.gender}', '{user.location}', '{user.education}', '{interests_string}', '{user.politics}', '{user.intentions}',
-                           '{user.preferred_genders}', '{user.age_low}', {user.age_high})""")
+                           '{user.preferred_genders}', {user.age_low}, {user.age_high}, '{weights_string}')""")
             conn.commit()
             conn.close()
             print('Successfully added user to db')
@@ -195,34 +197,6 @@ class user_management_new:
         conn.close()
         return list(preferred_genders)
     
-    def get_age_limit(self, user_id):
-        '''
-        Gets the age range of an associated user_id
-        '''
-        conn = sqlite3.connect(self.db_file)
-        cursor = conn.cursor()
-
-        cursor.execute(f"""SELECT age_low, age_high FROM users
-                       WHERE user_id = {user_id}""")
-        ages = cursor.fetchone()
-        age_low, age_high = ages[0], ages[1]
-        conn.close()
-        return age_low, age_high
-    
-    def get_interests(self, user_id):
-        '''
-        Gets the interests of an associated user_id
-        '''
-        conn = sqlite3.connect(self.db_file)
-        cursor = conn.cursor()
-
-        cursor.execute(f"""SELECT interests FROM users
-                       WHERE user_id = {user_id}""")
-        interests = cursor.fetchone()[0]
-        interests = interests.split(',')
-        conn.close()
-        return interests
-    
     def get_liked_profiles(self, user_id):
         '''
         Gets all profiles the user has liked
@@ -266,6 +240,49 @@ class user_management_new:
         conn.close()
         return users
 
+    def get_user_info(self, user_id):
+        '''
+        Gets all attributes of a particular user
+        '''
+        conn = sqlite3.connect(self.db_file)
+        query = f"""SELECT * FROM users
+                WHERE user_id = {user_id}
+                """
+        u = pd.read_sql_query(query, conn)
+        u['interests'] = u['interests'].apply(lambda x: x.split(',') if x else [])
+        u['weights'] = u['weights'].apply(lambda x: list(map(int, x.split(','))) if x else [])
+        user = User(u.iloc[0].username, u.iloc[0].password, u.iloc[0].user_id, u.iloc[0]['name'], u.iloc[0].age, u.iloc[0].gender,
+                    u.iloc[0].location, u.iloc[0].education, u.iloc[0].interests, u.iloc[0].politics, u.iloc[0].intentions,
+                    u.iloc[0].preferred_genders, u.iloc[0].age_low, u.iloc[0].age_high, u.iloc[0].weights)
+        conn.close()
+        return user
+
+    def update_user_info(self, user):
+        interests_string = (','.join(list(user.interests)))
+        weights_string = ','.join(list(map(str, user.weights)))
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+        cursor.execute(f"""UPDATE users
+                        SET username = '{user.username}', 
+                            password = '{user.password}', 
+                            name = '{user.name}', 
+                            age = {user.age}, 
+                            gender = '{user.gender}', 
+                            location = '{user.location}', 
+                            education = '{user.education}', 
+                            interests = '{interests_string}', 
+                            politics = '{user.politics}', 
+                            intentions = '{user.intentions}', 
+                            preferred_genders = '{user.preferred_genders}', 
+                            age_low = {user.age_low}, 
+                            age_high = {user.age_high},
+                            weights = '{weights_string}'
+                        WHERE user_id = {user.user_id}""")
+        conn.commit()
+        conn.close()
+        print(f'Successfully updated user {user.user_id} in db')
+        return True
+
     def get_potentials(self, user_id):
         '''
         Gets all profiles that a user has not seen
@@ -278,6 +295,7 @@ class user_management_new:
 
         all_users = self.get_all_users().copy()
         all_users['interests'] = all_users['interests'].apply(lambda x: x.split(',') if x else [])
+        all_users['weights'] = all_users['weights'].apply(lambda x: list(map(int, x.split(','))) if x else [])
         actual_user = all_users[all_users['user_id'] == user_id]
         all_users = all_users[all_users['user_id'] != user_id]
 
@@ -288,6 +306,7 @@ class user_management_new:
         education = actual_user['education'].values[0]
         politics = actual_user['politics'].values[0]
         intention = actual_user['intentions'].values[0]
+        weights = np.array(actual_user['weights'].values[0])
         
         gender_filtered = all_users[all_users['gender'].isin(preferred_genders)]
         seen_filtered = gender_filtered[~gender_filtered['user_id'].isin(liked_profiles + disliked_profiles)]
@@ -302,7 +321,7 @@ class user_management_new:
 
         all_scores = seen_filtered[['age_score', 'interest_score', 'location_score', 'education_score', 'politics_score', 'intention_score', 'liked_user']]
         all_scores = np.array(all_scores)
-        weighted_score = all_scores @ (DEFAULT_WEIGHTS / np.sum(DEFAULT_WEIGHTS))
+        weighted_score = all_scores @ (weights / np.sum(weights))
         seen_filtered['weighted_score'] = weighted_score
         seen_filtered = seen_filtered.sort_values(by='weighted_score', ascending=False)
 
@@ -365,4 +384,5 @@ class user_management_new:
 #Test the get_potentials function
 if __name__ == "__main__":
     user = user_management_new()
-    user.get_potentials(46)
+    info = user.get_user_info(3)
+    print(info)
