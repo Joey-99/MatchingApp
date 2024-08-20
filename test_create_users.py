@@ -41,19 +41,20 @@ def generate_random_user_data():
     user_interests = random.sample(interests, k=random.randint(1, 5))  # Choose 1-5 random interests
     politic = random.choice(politics)
     intention = random.choice(intentions)
+    weights = [5,5,5,5,5,5,5]
 
-    return username, password, name, age, gender, location, education, preferred_genders, age_low, age_high, user_interests, politic, intention
+    return username, password, name, age, gender, location, education, preferred_genders, age_low, age_high, user_interests, politic, intention, weights
 
 # Creating 200 user profiles
 created_count = 0
 for i in range(20):
-    username, password, name, age, gender, location, education, preferred_genders, age_low, age_high, user_interests, politic, intention = generate_random_user_data()
+    username, password, name, age, gender, location, education, preferred_genders, age_low, age_high, user_interests, politic, intention, weights = generate_random_user_data()
     
     if not user_management.check_valid_username(username):
         print(f"Skipping duplicate username: {username}")
         continue
 
-    user_profile = user_management.create_user(username, password, name, age, gender, location, education, user_interests, politic, intention, preferred_genders, age_low, age_high)
+    user_profile = user_management.create_user(username, password, name, age, gender, location, education, user_interests, politic, intention, preferred_genders, age_low, age_high, weights)
     user_management.add_user_to_db(user_profile)
     
     created_count += 1

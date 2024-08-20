@@ -3,6 +3,17 @@ from user_management_new import user_management_new
 
 COLUMNS_TO_SHOW = ['name', 'age', 'gender', 'location', "interests"]
 
+def get_username():
+    username = input("\nPlease enter a username (minimum length of 5 characters): ")
+    valid = user.check_valid_username(username)
+    while not valid or len(username) < 5:
+        if len(username) < 5:
+            username = input("Username must be a minimum of 5 characters: ")
+        else:
+            username = input(f"The username '{username}' already exists, please try again (minimum length of 5 characters): ")
+            valid = user.check_valid_username(username)
+    return username
+
 def get_user_name():
     name = input("\nPlease enter your name: ")
     return name
@@ -18,6 +29,29 @@ def get_user_age():
         except Exception:
             age = input("Age error, please enter your age (1-100): ")
     return age
+
+def get_user_feature_weights():
+    print('Please enter a rating of 1-10 for the following user attributes: age, interests, location, education, politics, and dating intentions')
+    print("If you wish to use default equal weights, please enter 'done'")
+    features = ['Age', 'Interests', 'Location', 'Education', 'Politics', 'Dating Intentions']
+    weights = []
+    for feature in features:
+        weight = input(f'{feature}: ')
+        if weight.strip().lower() == 'done':
+            weights = [5,5,5,5,5,5,5]
+            return weights
+        while True:
+            try:
+                weight = int(weight)
+                if weight < 1 or weight > 10:
+                    raise ValueError
+                break
+            except Exception:
+                weight = input("Feature weight error, please enter a weight from 1-10: ")
+        weights.append(weight)
+    max_weight = max(weights)
+    weights.append(max_weight)
+    return weights 
 
 def get_user_gender():
     gender = input("\nPlease enter your gender ('M' for male, 'F' for female, 'O' for other): ").upper()
@@ -113,7 +147,7 @@ def get_user_interests():
             interest = input("Invalid interest, please choose from the following options: ").strip(",._ ").lower()
         interests_list.append(interest)
         
-    return interests_list
+    return list(set(interests_list))
 
 if __name__ == '__main__':
     # Instantiate the user object
@@ -126,16 +160,8 @@ if __name__ == '__main__':
         
         # exit commands
         if cmd == 'create_account':
-            username = input("\nPlease enter a username (minimum length of 5 characters): ")
-            valid = user.check_valid_username(username)
-            while not valid or len(username) < 5:
-                if len(username) < 5:
-                    username = input("Username must be a minimum of 5 characters: ")
-                else:
-                    username = input(f"The username '{username}' already exists, please try again (minimum length of 5 characters): ")
-                    valid = user.check_valid_username(username)
+            username = get_username()
             password = get_password()
-            
             name = get_user_name()
             age = get_user_age()
             gender = get_user_gender()
@@ -146,8 +172,9 @@ if __name__ == '__main__':
             intentions = get_dating_intentions()
             preferred_genders = get_preferred_genders()
             age_low, age_high = get_age_range()
+            weights = get_user_feature_weights()
 
-            user1 = user.create_user(username, password, name, age, gender, location, education, interests, politics, intentions, preferred_genders, age_low, age_high)
+            user1 = user.create_user(username, password, name, age, gender, location, education, interests, politics, intentions, preferred_genders, age_low, age_high, weights)
             user.add_user_to_db(user1)
             print(f'\nWelcome {username}! :) Please select an option from the list below to get started:')
             logged_in = True
@@ -217,41 +244,48 @@ if __name__ == '__main__':
                 elif sure == 'N':
                     continue
             elif option == 'edit_profile':
-                edit_option = input('\nWhich profile field would you like to update (password, name, age, gender, location, politics, intentions, interests, preferred_genders, preferred_age): ')
-                while edit_option not in ['password', 'name', 'age', 'gender', 'location', 'education', 'preferred_genders', 'preferred_age', 'interests', 'politics', 'intentions']:
+                edit_option = input('\nWhich profile field would you like to update (username, password, name, age, gender, location, education, politics, intentions, interests, preferred_genders, preferred_age, weights): ')
+                while edit_option not in ['username', 'password', 'name', 'age', 'gender', 'location', 'education', 'preferred_genders', 'preferred_age', 'interests', 'politics', 'intentions', 'weights']:
                     edit_option = input('Invalid input, which profile field would you like to update (password, name, age, gender, location, preferred_genders): ')
+                info = user.get_user_info(user_id)
                 if edit_option == 'password':
                     new_password = get_password()
-                    user.update_field(user_id, edit_option, new_password)
+                    info.password = new_password
+                elif edit_option == 'username':
+                    new_username = get_username()
+                    info.username = new_username
                 elif edit_option == 'name':
                     new_name = get_user_name()
-                    user.update_field(user_id, edit_option, new_name)
+                    info.name = new_name
                 elif edit_option == 'age':
                     new_age = get_user_age()
-                    user.update_field(user_id, edit_option, new_age, 'int')
+                    info.age = new_age
                 elif edit_option == 'gender':
                     new_gender = get_user_gender()
-                    user.update_field(user_id, edit_option, new_gender)
+                    info.gender = new_gender
                 elif edit_option == 'location':
                     new_location = get_user_location()
-                    user.update_field(user_id, edit_option, new_location)
+                    info.location = new_location
                 elif edit_option == 'education':
                     new_education = get_user_education_level()
-                    user.update_field(user_id, edit_option, new_education)
+                    info.education = new_education
                 elif edit_option == 'preferred_genders':
                     new_pref_genders = get_preferred_genders()
-                    user.update_field(user_id, edit_option, new_pref_genders)
+                    info.preferred_genders = new_pref_genders
                 elif edit_option == 'preferred_age':
                     new_age_min, new_age_max = get_age_range()
-                    user.update_field(user_id, 'age_low', new_age_min, 'int')
-                    user.update_field(user_id, 'age_high', new_age_max, 'int')
+                    info.age_low = new_age_min
+                    info.age_high = new_age_max
                 elif edit_option == 'interests':
                     new_interests = get_user_interests()
-                    new_interests = ','.join(new_interests)
-                    user.update_field(user_id, edit_option, new_interests)
+                    info.interests = new_interests
                 elif edit_option == 'politics':
                     new_politics = get_political_view()
-                    user.update_field(user_id, edit_option, new_politics)
+                    info.politics = new_politics
                 elif edit_option == 'intentions':
                     new_intentions = get_dating_intentions()
-                    user.update_field(user_id, edit_option, new_intentions)
+                    info.intentions = new_intentions
+                elif edit_option == 'weights':
+                    new_weights = get_user_feature_weights()
+                    info.weights = new_weights
+                user.update_user_info(info)
