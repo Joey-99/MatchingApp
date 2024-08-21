@@ -17,10 +17,37 @@ def generate_random_user_data():
         "music", "movies", "sports", "reading", "travel", "hiking", "cooking", "gaming", "gardening"
     ]
     locations = [
-        "New York, USA", "Los Angeles, USA", "Chicago, USA", "Houston, USA", "Phoenix, USA", "Philadelphia, USA", "San Antonio, USA",
-        "San Diego, USA", "Dallas, USA", "San Jose, USA", "Austin, USA", "Jacksonville, USA", "Fort Worth, USA", "Columbus, USA", "Charlotte, USA",
-        "San Francisco, USA", "Indianapolis, USA", "Seattle, USA", "Denver, USA", "Washington D.C., USA", "Miami, USA", "Atlanta, USA", "Boston, USA","Toronto, CA"
-    ]
+    "Toronto",
+    "Ottawa",
+    "Mississauga",
+    "Brampton",
+    "Hamilton",
+    "London",
+    "Markham",
+    "Vaughan",
+    "Kitchener",
+    "Windsor",
+    "Richmond Hill",
+    "Burlington",
+    "Oshawa",
+    "Greater Sudbury",
+    "Barrie",
+    "Guelph",
+    "Cambridge",
+    "St. Catharines",
+    "Waterloo",
+    "Thunder Bay",
+    "Brantford",
+    "Pickering",
+    "Niagara Falls",
+    "Peterborough",
+    "Sault Ste. Marie",
+    "Sarnia",
+    "Norfolk County",
+    "Welland",
+    "Belleville",
+    "North Bay"
+]
     genders = ['M', 'F', 'O']
     #preferred_genders_options = ['M', 'F', 'O', 'MF', 'MFO', 'FO']
     preferred_genders_options = ['MFO']
