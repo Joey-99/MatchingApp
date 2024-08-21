@@ -91,7 +91,7 @@ def get_user_location():
     return location
 
 def get_user_location():
-    location = input("\nPlease enter your location one of your cities in Ontario, Canada: ").strip(",._ ").lower()
+    location = input("\nPlease enter your location one of your cities in Ontario, Canada: ").strip(",._ ")
     ontario_cities = [
     "Toronto",
     "Ottawa",
@@ -125,7 +125,7 @@ def get_user_location():
     "North Bay"
 ]
     while location not in ontario_cities:
-        location = input("Invalid education level, please enter your location: ").strip(",._ ").lower()
+        location = input("Invalid Location, please enter your location: ").strip(",._ ")
     return location
 
 def get_user_education_level():
