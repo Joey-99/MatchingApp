@@ -16,8 +16,8 @@ class GUI:
     def __init__(self, root, store: user_management_new):
         self.root = root
         self.store = store
-        self.user_id = None
-        # self.user_id = 1
+        # self.user_id = None
+        self.user_id = 10
         self.root.title('Two-way Street')
         self.root.geometry(str(width) + "x" + str(height))
 
@@ -159,6 +159,8 @@ class LikeAndDislike:
             users.append(user)
 
         if len(users) == 0 or len(users) < (self.index + 1 + 1):
+            messagebox.showerror("ERROR", " there are no users to view")
+
             return
 
         self.index += 1
@@ -189,21 +191,31 @@ class LikeAndDislike:
         user = users[self.index]
 
         y = 0.0
-        for key in [['name', 'name'], ['age', 'age'], ['gender', 'gender'], ['location', 'location'],
-                    ['preferred_genders', 'preferred genders'],
-                    ['age_low', 'preferred age low'],
-                    ['age_high', 'preferred age high']]:
-            y += 0.1
+        for key in [
+            ['name', 'name'],
+            ['age', 'age'],
+            ['gender', 'gender'],
+            ['location', 'location'],
+            ['education', 'education'],
+            ['interests', 'interests'],
+            ['politics', 'politics'],
+            ['intentions', 'intentions'],
+            ['preferred_genders', 'preferred genders'],
+            ['age_low', 'preferred age low'],
+            ['age_high', 'preferred age high']
+        ]:
+            y += 0.065
             tkinter.Label(self.page, text=key[1]).place(
                 width=150,
                 height=30,
-                x=width * 0.3,
+                x=width * 0.2,
                 y=height * y
             )
-            tkinter.Label(self.page, text=user[key[0]]).place(
-                width=200,
+            text = user[key[0]]
+            tkinter.Label(self.page, text=text).place(
+                width=350,
                 height=30,
-                x=width * 0.5,
+                x=width * 0.4,
                 y=height * y
             )
 
@@ -213,6 +225,8 @@ class LikeAndDislike:
             users.append(user)
 
         if len(users) == 0 or len(users) < (self.index + 1 + 1):
+            messagebox.showerror("ERROR", " there are no users to view")
+
             return
 
         user = users[self.index]
@@ -243,7 +257,7 @@ class LikeAndDislike:
 class Register:
     def __init__(self, gui: GUI):
         self.political_orientation_input = None
-        self.dating_orientation_input = None
+        self.dating_intentions_input = None
         self.interests_input = None
         self.preferred_gender_m_input = None
         self.preferred_gender_f_input = None
@@ -259,6 +273,41 @@ class Register:
         self.preferred_age_high_input = None
         self.gui = gui
         self.init()
+
+        # 2 is change
+        self.state = 1
+        self.oldUsername = None
+        self.user = None
+
+    def change(self, user: User):
+        self.user = user
+        self.oldUsername = user.username
+        self.state = 2
+
+        self.username_input.insert(0, user.username)
+        self.password_input.insert(0, user.password)
+        self.name_input.insert(0, user.name)
+        self.age_input.insert(0, user.age)
+        self.location_input.set(user.location)
+        self.gender_input.set(user.gender[0])
+        self.preferred_age_low_input.insert(0, user.age_low)
+        self.preferred_age_high_input.insert(0, user.age_high)
+        self.education_level_input.set(user.education)
+
+        for value in user.interests:
+            for interests in self.interests_input:
+                if value == interests['value']:
+                    interests['select'].set(1)
+
+        if 'M' in user.preferred_genders:
+            self.preferred_gender_m_input.set(1)
+        if 'F' in user.preferred_genders:
+            self.preferred_gender_f_input.set(1)
+        if 'O' in user.preferred_genders:
+            self.preferred_gender_o_input.set(1)
+
+        self.political_orientation_input.set(user.politics)
+        self.dating_intentions_input.set(user.intentions)
 
     def init(self):
         self.page = tkinter.Frame(self.gui.root, width=width, height=height, bg='white')
@@ -324,12 +373,41 @@ class Register:
             y=height * 0.18
         )
 
+        location = tkinter.Label(self.page, text="Location")
+        location.place(
+            width=150,
+            height=30,
+            x=width * 0.2,
+            y=height * 0.24
+        )
+
+        self.location_input = tkinter.ttk.Combobox(self.page, state='readonly')
+        self.location_input['values'] = (
+            'Toronto',
+            'Ottawa',
+            'Mississauga',
+            'Brampton',
+            'Hamilton',
+            'London',
+            'Markham',
+            'Vaughan',
+            'Kitchener',
+            'Windsor'
+        )
+        self.location_input.set(self.location_input['values'][0])
+        self.location_input.place(
+            width=width * 0.3,
+            height=30,
+            x=width * 0.4,
+            y=height * 0.24
+        )
+
         gender = tkinter.Label(self.page, text="Gender")
         gender.place(
             width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.24
+            y=height * 0.3
         )
 
         self.gender_input = tkinter.StringVar()
@@ -343,7 +421,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.4,
-            y=height * 0.24
+            y=height * 0.3
         )
         female_radio = tkinter.Radiobutton(
             self.page,
@@ -355,7 +433,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.5,
-            y=height * 0.24
+            y=height * 0.3
         )
         other_radio = tkinter.Radiobutton(
             self.page,
@@ -367,24 +445,9 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.6,
-            y=height * 0.24
+            y=height * 0.3
         )
         other_radio.select()
-
-        location = tkinter.Label(self.page, text="Location")
-        location.place(
-            width=150,
-            height=30,
-            x=width * 0.2,
-            y=height * 0.3
-        )
-        self.location_input = tkinter.Entry(self.page)
-        self.location_input.place(
-            width=width * 0.3,
-            height=30,
-            x=width * 0.4,
-            y=height * 0.3
-        )
 
         preferred_age = tkinter.Label(self.page, text="Preferred Age")
         preferred_age.place(
@@ -415,12 +478,116 @@ class Register:
             y=height * 0.36
         )
 
+        education_level = tkinter.Label(self.page, text="Education Level")
+        education_level.place(
+            width=150,
+            height=30,
+            x=width * 0.2,
+            y=height * 0.42
+        )
+
+        self.education_level_input = tkinter.StringVar()
+        education_level_highschool_input = tkinter.Radiobutton(
+            self.page,
+            text="highschool",
+            variable=self.education_level_input,
+            value="highschool"
+        )
+        education_level_highschool_input.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.4,
+            y=height * 0.42
+        )
+        education_level_college_input = tkinter.Radiobutton(
+            self.page,
+            text="college",
+            variable=self.education_level_input,
+            value="college"
+        )
+        education_level_college_input.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.5,
+            y=height * 0.42
+        )
+        education_level_bachelor_input = tkinter.Radiobutton(
+            self.page,
+            text="bachelor",
+            variable=self.education_level_input,
+            value="bachelor"
+        )
+        education_level_bachelor_input.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.6,
+            y=height * 0.42
+        )
+        education_level_master_input = tkinter.Radiobutton(
+            self.page,
+            text="master",
+            variable=self.education_level_input,
+            value="master"
+        )
+        education_level_master_input.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.7,
+            y=height * 0.42
+        )
+        education_level_phd_input = tkinter.Radiobutton(
+            self.page,
+            text="phd",
+            variable=self.education_level_input,
+            value="phd"
+        )
+        education_level_phd_input.place(
+            width=width * 0.1,
+            height=30,
+            x=width * 0.8,
+            y=height * 0.42
+        )
+        education_level_highschool_input.select()
+
+        interests = tkinter.Label(self.page, text="Interests")
+        interests.place(
+            width=150,
+            height=30,
+            x=width * 0.2,
+            y=height * 0.48
+        )
+
+        interests = [
+            "music", "movies", "sports", "reading", "travel",
+            "hiking", "cooking", "gaming", "gardening"
+        ]
+        index = -1
+        line = -1
+        self.interests_input = []
+        for interest in interests:
+            index += 1
+            if index % 5 == 0:
+                line += 1
+
+            self.interests_input.append({'value': interest, 'select': tkinter.IntVar()})
+            temp = tkinter.Checkbutton(
+                self.page,
+                text=interest,
+                variable=self.interests_input[-1]['select']
+            )
+            temp.place(
+                width=width * 0.11,
+                height=30,
+                x=width * (0.4 + 0.11 * (index % 5)),
+                y=height * 0.48 + line * 30
+            )
+
         preferred_gender = tkinter.Label(self.page, text="Preferred Gender")
         preferred_gender.place(
             width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.42
+            y=height * 0.6
         )
 
         self.preferred_gender_m_input = tkinter.IntVar()
@@ -433,7 +600,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.4,
-            y=height * 0.42
+            y=height * 0.6
         )
         self.preferred_gender_f_input = tkinter.IntVar()
         preferred_gender_f_input = tkinter.Checkbutton(
@@ -445,7 +612,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.5,
-            y=height * 0.42
+            y=height * 0.6
         )
         self.preferred_gender_o_input = tkinter.IntVar()
         preferred_gender_o_input = tkinter.Checkbutton(
@@ -457,22 +624,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.6,
-            y=height * 0.42
-        )
-
-        interests = tkinter.Label(self.page, text="Interests")
-        interests.place(
-            width=150,
-            height=30,
-            x=width * 0.2,
-            y=height * 0.48
-        )
-        self.interests_input = tkinter.Entry(self.page)
-        self.interests_input.place(
-            width=width * 0.3,
-            height=30,
-            x=width * 0.4,
-            y=height * 0.48
+            y=height * 0.6
         )
 
         political_orientation = tkinter.Label(self.page, text="Political orientation")
@@ -480,7 +632,7 @@ class Register:
             width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.54
+            y=height * 0.66
         )
         self.political_orientation_input = tkinter.StringVar()
         political_orientation_input_l_radio = tkinter.Radiobutton(
@@ -493,7 +645,7 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.4,
-            y=height * 0.54
+            y=height * 0.66
         )
         political_orientation_input_c_radio = tkinter.Radiobutton(
             self.page,
@@ -505,7 +657,7 @@ class Register:
             width=width * 0.15,
             height=30,
             x=width * 0.5,
-            y=height * 0.54
+            y=height * 0.66
         )
         political_orientation_input_n_radio = tkinter.Radiobutton(
             self.page,
@@ -517,59 +669,82 @@ class Register:
             width=width * 0.1,
             height=30,
             x=width * 0.65,
-            y=height * 0.54
+            y=height * 0.66
         )
         political_orientation_input_n_radio.select()
 
-        dating_orientation = tkinter.Label(self.page, text="Dating orientation")
-        dating_orientation.place(
+        dating_intentions = tkinter.Label(self.page, text="Dating orientation")
+        dating_intentions.place(
             width=150,
             height=30,
             x=width * 0.2,
-            y=height * 0.6
+            y=height * 0.72
         )
-        self.dating_orientation_input = tkinter.StringVar()
-        dating_orientation_input_l_radio = tkinter.Radiobutton(
+        self.dating_intentions_input = tkinter.StringVar()
+        dating_intentions_input_s_radio = tkinter.Radiobutton(
             self.page,
-            text="Long-term",
-            variable=self.dating_orientation_input,
-            value="L"
+            text="Short-term",
+            variable=self.dating_intentions_input,
+            value="S"
         )
-        dating_orientation_input_l_radio.place(
-            width=width * 0.1,
+        dating_intentions_input_s_radio.place(
+            width=width * 0.12,
             height=30,
             x=width * 0.4,
-            y=height * 0.6
+            y=height * 0.72
         )
-        dating_orientation_input_c_radio = tkinter.Radiobutton(
+        dating_intentions_input_l_radio = tkinter.Radiobutton(
+            self.page,
+            text="Long-term",
+            variable=self.dating_intentions_input,
+            value="L"
+        )
+        dating_intentions_input_l_radio.place(
+            width=width * 0.12,
+            height=30,
+            x=width * 0.52,
+            y=height * 0.72
+        )
+        dating_intentions_input_c_radio = tkinter.Radiobutton(
             self.page,
             text="Casual",
-            variable=self.dating_orientation_input,
+            variable=self.dating_intentions_input,
             value="C"
         )
-        dating_orientation_input_c_radio.place(
-            width=width * 0.1,
+        dating_intentions_input_c_radio.place(
+            width=width * 0.12,
             height=30,
-            x=width * 0.5,
-            y=height * 0.6
+            x=width * 0.64,
+            y=height * 0.72
         )
-        dating_orientation_input_lp_radio = tkinter.Radiobutton(
+        dating_intentions_input_lp_radio = tkinter.Radiobutton(
             self.page,
             text="Life partner",
-            variable=self.dating_orientation_input,
+            variable=self.dating_intentions_input,
             value="LP"
         )
-        dating_orientation_input_lp_radio.place(
+        dating_intentions_input_lp_radio.place(
             width=width * 0.15,
             height=30,
-            x=width * 0.6,
-            y=height * 0.6
+            x=width * 0.76,
+            y=height * 0.72
         )
-        dating_orientation_input_lp_radio.select()
+        dating_intentions_input_lp_radio.select()
 
         submit_btn = tkinter.Button(
             self.page,
-            text="Submit",
+            text="Back",
+            command=self.back,
+        )
+        submit_btn.place(
+            width=200,
+            height=50,
+            x=(width - 200) / 2,
+            y=height * 0.9 - 60
+        )
+        submit_btn = tkinter.Button(
+            self.page,
+            text="Next",
             command=self.submit,
         )
         submit_btn.place(
@@ -580,55 +755,14 @@ class Register:
         )
 
     def submit(self):
-        if self.username_input is None:
-            messagebox.showerror("ERROR", "username is None")
-            return
-        if self.password_input is None:
-            messagebox.showerror("ERROR", "password is None")
-            return
-        if self.name_input is None:
-            messagebox.showerror("ERROR", "name is None")
-            return
-        if self.age_input is None:
-            messagebox.showerror("ERROR", "age is None")
-            return
-        if self.gender_input is None:
-            messagebox.showerror("ERROR", "gender is None")
-            return
-        if self.location_input is None:
-            messagebox.showerror("ERROR", "location is None")
-            return
-        if self.preferred_age_low_input is None:
-            messagebox.showerror("ERROR", "preferred age low is None")
-            return
-        if self.preferred_age_high_input is None:
-            messagebox.showerror("ERROR", "preferred age high is None")
-            return
-        if self.preferred_gender_m_input is None:
-            messagebox.showerror("ERROR", "preferred gender is None")
-            return
-        if self.preferred_gender_f_input is None:
-            messagebox.showerror("ERROR", "preferred gender is None")
-            return
-        if self.preferred_gender_o_input is None:
-            messagebox.showerror("ERROR", "preferred gender is None")
-            return
-        if self.interests_input is None:
-            messagebox.showerror("ERROR", "interests is None")
-            return
-        if self.political_orientation_input is None:
-            messagebox.showerror("ERROR", "preferred orientation is None")
-            return
-        if self.dating_orientation_input is None:
-            messagebox.showerror("ERROR", "dating orientation is None")
-            return
 
         if self.username_input.get().strip() == "":
             messagebox.showerror("ERROR", "username is Empty")
             return
-        if self.gui.store.check_valid_username(self.username_input.get().strip()) == False:
-            messagebox.showerror("ERROR", "username already exists")
-            return
+        if self.state != 2 or self.oldUsername != self.user.username:
+            if self.gui.store.check_valid_username(self.username_input.get().strip()) == False:
+                messagebox.showerror("ERROR", "username already exists")
+                return
         if self.name_input.get().strip() == "":
             messagebox.showerror("ERROR", "name is Empty")
             return
@@ -644,8 +778,13 @@ class Register:
         if self.gender_input.get().strip() == "":
             messagebox.showerror("ERROR", "gender is Empty")
             return
-        if self.location_input.get().strip() == "":
-            messagebox.showerror("ERROR", "location is Empty")
+
+        interests = []
+        for interest in self.interests_input:
+            if interest['select'].get() == 1:
+                interests.append(interest['value'])
+        if len(interests) == 0:
+            messagebox.showerror("ERROR", "interests is Empty")
             return
 
         try:
@@ -688,37 +827,205 @@ class Register:
         if (self.preferred_gender_o_input.get() == 1):
             preferred_gender = preferred_gender + 'O'
 
-        if self.interests_input.get().strip() == '':
-            messagebox.showerror("ERROR", "interests is Empty")
-            return
-        if self.political_orientation_input.get().strip() == '':
-            messagebox.showerror("ERROR", "preferred orientation is Empty")
-            return
-        if self.dating_orientation_input.get().strip() == '':
-            messagebox.showerror("ERROR", "dating orientation is Empty")
-            return
+            # user: User = self.gui.store.create_user(
+            #     username=self.username_input.get().strip(),
+            #     password=self.password_input.get().strip(),
+            #     name=self.name_input.get().strip(),
+            #     age=int(self.age_input.get().strip()),
+            #     gender=self.gender_input.get().strip(),
+            #     location=self.location_input.get().strip(),
+            #     education=self.education_level_input.get().strip(),
+            #     interests=interests,
+            #     politics=self.political_orientation_input.get().strip(),
+            #     intentions=self.dating_intentions_input.get().strip(),
+            #     preferred_genders=preferred_gender,
+            #     age_low=int(self.preferred_age_low_input.get().strip()),
+            #     age_high=int(self.preferred_age_high_input.get().strip()),
+            #     weights=[5, 5, 5, 5, 5, 5, 5]
+            # )
 
-        user: User = self.gui.store.create_user(
-            self.username_input.get().strip(),
-            self.password_input.get().strip(),
-            self.name_input.get().strip(),
-            int(self.age_input.get().strip()),
-            self.gender_input.get().strip(),
-            self.location_input.get().strip(),
-            self.interests_input.get().strip().split(','),
-            self.political_orientation_input.get().strip(),
-            self.dating_orientation_input.get().strip(),
-            preferred_gender,
-            int(self.preferred_age_low_input.get().strip()),
-            int(self.preferred_age_high_input.get().strip())
+            # if self.gui.store.add_user_to_db(user) == False:
+            #     messagebox.showerror("ERROR", "register ERROR")
+            # else:
+            #     messagebox.showinfo("SUCCESS", "register SUCCESS")
+
+        username = self.username_input.get().strip()
+        password = self.password_input.get().strip()
+        name = self.name_input.get().strip()
+        age = int(self.age_input.get().strip())
+        gender = self.gender_input.get().strip()
+        location = self.location_input.get().strip()
+        education = self.education_level_input.get().strip()
+        interests = interests
+        politics = self.political_orientation_input.get().strip()
+        intentions = self.dating_intentions_input.get().strip()
+        preferred_genders = preferred_gender
+        age_low = int(self.preferred_age_low_input.get().strip())
+        age_high = int(self.preferred_age_high_input.get().strip())
+
+        self.page.pack_forget()
+        changePage = RegisterNext(self.gui,
+                                  username, password, name, age, gender, location, education, interests, politics,
+                                  intentions, preferred_genders, age_low, age_high
+                                  )
+        if self.state == 2:
+            changePage.change(self.user)
+
+    def back(self):
+        self.page.pack_forget()
+        Login(self.gui)
+
+
+class RegisterNext:
+    def __init__(self, gui: GUI,
+                 username, password, name, age, gender, location, education, interests, politics,
+                 intentions, preferred_genders, age_low, age_high):
+        self.variables = None
+        self.gui = gui
+        self.username = username
+        self.password = password
+        self.name = name
+        self.age = age
+        self.gender = gender
+        self.location = location
+        self.education = education
+        self.interests = interests
+        self.politics = politics
+        self.intentions = intentions
+        self.preferred_genders = preferred_genders
+        self.age_low = age_low
+        self.age_high = age_high
+        self.init()
+
+        # 2 is change
+        self.state = 1
+        self.user = None
+
+    def change(self, user: User):
+        self.user = user
+        self.state = 2
+
+        index = -1
+        for variable in self.variables:
+            index += 1
+            if index + 1 <= len(self.user.weights):
+                variable.set(self.user.weights[index])
+
+    def init(self):
+        self.page = tkinter.Frame(self.gui.root, width=width, height=height, bg='white')
+        self.page.pack()
+
+        self.variables = []
+
+        features = ['Age', 'Interests', 'Location', 'Education', 'Politics', 'Dating Intentions']
+
+        index = -1
+        line = -1
+        for feature in features:
+            line += 1
+            index += 1
+            label = tkinter.Label(self.page, text=feature)
+            label.place(
+                width=150,
+                height=50,
+                x=width * 0.2,
+                y=height * 0 + line * 60
+            )
+
+            self.variables.append(tkinter.IntVar())
+
+            self.location_input = tkinter.Scale(
+                self.page, from_=1, to=10,
+                orient=tkinter.HORIZONTAL,
+                variable=self.variables[index]
+            )
+            self.location_input.place(
+                width=width * 0.3,
+                height=50,
+                x=width * 0.4,
+                y=height * 0 + line * 60
+            )
+
+        submit_btn = tkinter.Button(
+            self.page,
+            text="Back",
+            command=self.back,
+        )
+        submit_btn.place(
+            width=200,
+            height=50,
+            x=(width - 200) / 2,
+            y=height * 0.9 - 60
+        )
+        submit_btn = tkinter.Button(
+            self.page,
+            text="Submit",
+            command=self.submit,
+        )
+        submit_btn.place(
+            width=200,
+            height=50,
+            x=(width - 200) / 2,
+            y=height * 0.9
         )
 
-        if self.gui.store.add_user_to_db(user) == False:
-            messagebox.showerror("ERROR", "register ERROR")
+    def submit(self):
+
+        weights = []
+
+        for variable in self.variables:
+            weights.append(variable.get())
+
+        if self.state == 2:
+            self.user.username = self.username
+            self.user.password = self.password
+            self.user.name = self.name
+            self.user.age = self.age
+            self.user.gender = self.gender
+            self.user.location = self.location
+            self.user.education = self.education
+            self.user.interests = self.interests
+            self.user.politics = self.politics
+            self.user.intentions = self.intentions
+            self.user.preferred_genders = self.preferred_genders
+            self.user.age_low = self.age_low
+            self.user.age_high = self.age_high
+            self.user.weights = weights
+            if self.gui.store.update_user_info(self.user) == False:
+                messagebox.showerror("ERROR", "update ERROR")
+            else:
+                messagebox.showinfo("SUCCESS", "update SUCCESS")
+                self.page.pack_forget()
+                Login(self.gui)
+
         else:
-            messagebox.showinfo("SUCCESS", "register SUCCESS")
-            self.page.pack_forget()
-            Login(self.gui)
+            user: User = self.gui.store.create_user(
+                username=self.username,
+                password=self.password,
+                name=self.name,
+                age=self.age,
+                gender=self.gender,
+                location=self.location,
+                education=self.education,
+                interests=self.interests,
+                politics=self.politics,
+                intentions=self.intentions,
+                preferred_genders=self.preferred_genders,
+                age_low=self.age_low,
+                age_high=self.age_high,
+                weights=weights
+            )
+
+            if self.gui.store.add_user_to_db(user) == False:
+                messagebox.showerror("ERROR", "register ERROR")
+            else:
+                messagebox.showinfo("SUCCESS", "register SUCCESS")
+                self.page.pack_forget()
+                Login(self.gui)
+
+    def back(self):
+        self.page.pack_forget()
+        Login(self.gui)
 
 
 class Home:
@@ -784,6 +1091,42 @@ class Home:
             width=50,
             height=30,
             x=350,
+            y=10
+        )
+
+        # logout_btn = tkinter.Button(
+        #     self.page,
+        #     text="Browse Profiles",
+        #     command=self.browseProfiles
+        # )
+        # logout_btn.place(
+        #     width=100,
+        #     height=30,
+        #     x=430,
+        #     y=10
+        # )
+
+        logout_btn = tkinter.Button(
+            self.page,
+            text="Delete Profiles",
+            command=self.deleteProfiles
+        )
+        logout_btn.place(
+            width=100,
+            height=30,
+            x=430,
+            y=10
+        )
+
+        logout_btn = tkinter.Button(
+            self.page,
+            text="Edit Profiles",
+            command=self.editProfiles
+        )
+        logout_btn.place(
+            width=100,
+            height=30,
+            x=550,
             y=10
         )
 
@@ -893,13 +1236,48 @@ class Home:
         self.page.pack_forget()
         Login(self.gui)
 
+    def browseProfiles(self):
+        user = self.gui.store.get_user_info(self.gui.user_id)
+        msg = ''
+        msg += 'user_id:' + str(user.user_id) + '\n'
+        msg += 'username:' + str(user.username) + '\n'
+        msg += 'password:' + str(user.password) + '\n'
+        msg += 'name:' + str(user.name) + '\n'
+        msg += 'age:' + str(user.age) + '\n'
+        msg += 'gender:' + str(user.gender) + '\n'
+        msg += 'location:' + str(user.location) + '\n'
+        msg += 'education:' + str(user.education) + '\n'
+        msg += 'interests:' + str(user.interests) + '\n'
+        msg += 'politics:' + str(user.politics) + '\n'
+        msg += 'intentions:' + str(user.intentions) + '\n'
+        msg += 'preferred_genders:' + str(user.preferred_genders) + '\n'
+        msg += 'age_low:' + str(user.age_low) + '\n'
+        msg += 'age_high:' + str(user.age_high) + '\n'
+        msg += 'weights:' + str(user.weights) + '\n'
+        messagebox.showinfo("Info", msg)
+
+    def deleteProfiles(self):
+        self.gui.store.delete_user_from_db(self.gui.user_id)
+        self.logout()
+
+    def editProfiles(self):
+        user = self.gui.store.get_user_info(self.gui.user_id)
+        self.excel_page.pack_forget()
+        self.page.pack_forget()
+        Register(self.gui).change(user)
+
 
 def start():
     root = tkinter.Tk()
     store = user_management_new()
     gui = GUI(root, store)
     Login(gui)
-    # Home(gui)
+    # RegisterNext(
+    #     gui,
+    #     None, None, None, None, None,
+    #     None, None, None, None, None, None,
+    #     None, None,
+    # )
     root.mainloop()
 
 
