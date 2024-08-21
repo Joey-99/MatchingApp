@@ -130,7 +130,6 @@ class LikeAndDislike:
         self.username_input = None
         self.password_input = None
         self.gui = gui
-        self.index = -1
         self.init()
 
     def init(self):
@@ -152,18 +151,11 @@ class LikeAndDislike:
             y=0
         )
 
-        users = []
-        for index, user in self.gui.store.get_all_users().iterrows():
-            if int(user['user_id']) == self.gui.user_id:
-                continue
-            users.append(user)
-
-        if len(users) == 0 or len(users) < (self.index + 1 + 1):
+        users = self.gui.store.get_potentials(self.gui.user_id)
+        if len(users) == 0:
             messagebox.showerror("ERROR", " there are no users to view")
 
             return
-
-        self.index += 1
 
         like_btn = tkinter.Button(
             self.page,
@@ -188,7 +180,7 @@ class LikeAndDislike:
             y=height * 0.9
         )
 
-        user = users[self.index]
+        user = users.loc[users.index[0]]
 
         y = 0.0
         for key in [
@@ -220,32 +212,26 @@ class LikeAndDislike:
             )
 
     def like(self):
-        users = []
-        for index, user in self.gui.store.get_all_users().iterrows():
-            users.append(user)
-
-        if len(users) == 0 or len(users) < (self.index + 1 + 1):
+        users = self.gui.store.get_potentials(self.gui.user_id)
+        if len(users) == 0:
             messagebox.showerror("ERROR", " there are no users to view")
-
             return
 
-        user = users[self.index]
+        user = users.loc[users.index[0]]
 
-        self.gui.store.like_profile(user['user_id'], self.gui.user_id)
+        self.gui.store.like_profile(self.gui.user_id, user['user_id'])
 
         self.next()
 
     def dislike(self):
-        users = []
-        for index, user in self.gui.store.get_all_users().iterrows():
-            users.append(user)
-
-        if len(users) == 0 or len(users) < (self.index + 1 + 1):
+        users = self.gui.store.get_potentials(self.gui.user_id)
+        if len(users) == 0:
+            messagebox.showerror("ERROR", " there are no users to view")
             return
 
-        user = users[self.index]
+        user = users.loc[users.index[0]]
 
-        self.gui.store.dislike_profile(user['user_id'], self.gui.user_id)
+        self.gui.store.dislike_profile(self.gui.user_id, user['user_id'])
 
         self.next()
 
@@ -1048,7 +1034,7 @@ class Home:
 
         like_btn = tkinter.Button(
             self.page,
-            text="Like/Dislike",
+            text="Browse Profiles",
             command=self.likeAndDislike
         )
         like_btn.place(
@@ -1072,7 +1058,7 @@ class Home:
 
         show_like_dislike_btn = tkinter.Button(
             self.page,
-            text="See matchs",
+            text="View Matches",
             command=self.show_like_dislike
         )
         show_like_dislike_btn.place(
@@ -1120,7 +1106,7 @@ class Home:
 
         logout_btn = tkinter.Button(
             self.page,
-            text="Edit Profiles",
+            text="Edit Profile",
             command=self.editProfiles
         )
         logout_btn.place(
