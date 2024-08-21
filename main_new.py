@@ -56,6 +56,44 @@ def get_user_location():
     location = input("\nPlease enter your location: ")
     return location
 
+def get_user_location():
+    location = input("\nPlease enter your location one of your cities in Ontario, Canada: ").strip(",._ ").lower()
+    ontario_cities = [
+    "Toronto",
+    "Ottawa",
+    "Mississauga",
+    "Brampton",
+    "Hamilton",
+    "London",
+    "Markham",
+    "Vaughan",
+    "Kitchener",
+    "Windsor",
+    "Richmond Hill",
+    "Burlington",
+    "Oshawa",
+    "Greater Sudbury",
+    "Barrie",
+    "Guelph",
+    "Cambridge",
+    "St. Catharines",
+    "Waterloo",
+    "Thunder Bay",
+    "Brantford",
+    "Pickering",
+    "Niagara Falls",
+    "Peterborough",
+    "Sault Ste. Marie",
+    "Sarnia",
+    "Norfolk County",
+    "Welland",
+    "Belleville",
+    "North Bay"
+]
+    while location not in ontario_cities:
+        location = input("Invalid education level, please enter your location: ").strip(",._ ").lower()
+    return location
+
 def get_user_education_level():
     education = input("\nPlease enter your education level as following ['highschool', 'bachelor', 'master', 'phd']: ").strip(",._ ").lower()
     while education not in ['highschool', 'bachelor', 'master', 'phd']:
