@@ -961,6 +961,7 @@ class RegisterNext:
 
         for variable in self.variables:
             weights.append(variable.get())
+        weights.append(max(weights))
 
         if self.state == 2:
             self.user.username = self.username
