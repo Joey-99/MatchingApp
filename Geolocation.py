@@ -1,123 +1,55 @@
-from geopy.geocoders import OpenCage
-from geopy.distance import geodesic
-import itertools
 import json
-
-# Replace 'YOUR_API_KEY' with your actual OpenCage API key
-geolocator = OpenCage(api_key='00f4aaf4afff4e268c8e172fb70366d4')
-
-def get_coordinates(location):
-    try:
-        location = geolocator.geocode(location)
-
-        return (location.latitude, location.longitude)
-
-
-    except Exception as e:
-        print(f"The error is {e}")
-        return "Please input the address in correct format"
-
-def get_distance(coords_1, coords_2):
-
-    try:
-      distance = geodesic(coords_1, coords_2).kilometers
-
-      #return f"The distance between {location1} and {location2} is {distance:.2f} kilometers."
-      return distance
-
-    except Exception:
-      return None
-    
-def iterate_pairwise(cities):
-    pairs = list(itertools.combinations(cities, 2))
-    return pairs
+import pandas as pd
+import numpy as np
 
 def write_dict_to_json(dictionary, filename):
     with open(filename, 'w') as json_file:
         json.dump(dictionary, json_file, indent=4)
-    
-
-cities = [
-    "Toronto",
-    "Ottawa",
-    "Mississauga",
-    "Brampton",
-    "Hamilton",
-    "London",
-    "Markham",
-    "Vaughan",
-    "Kitchener",
-    "Windsor",
-    "Richmond Hill",
-    "Burlington",
-    "Oshawa",
-    "Greater Sudbury",
-    "Barrie",
-    "Guelph",
-    "Cambridge",
-    "St. Catharines",
-    "Waterloo",
-    "Thunder Bay",
-    "Brantford",
-    "Pickering",
-    "Niagara Falls",
-    "Peterborough",
-    "Sault Ste. Marie",
-    "Sarnia",
-    "Norfolk County",
-    "Welland",
-    "Belleville",
-    "North Bay"
-]
-
-coordinates = {}
-score_dict = {}
-city_pairs = iterate_pairwise(cities)
-city_pairs = city_pairs[0:4]
-counter = 0
-
-# #Retrive the coordinates of each city
-# for city in cities:
-#   city_name = city + ",Ontario"
-#   print(city_name)
-#   latitude, longitude = get_coordinates(city_name)
-#   coordinates[city] = (latitude, longitude)
-
-# #Calculate the distance between each pair of cities and convert it to score
-# for city_pair in city_pairs:
-#   distance = get_distance(coordinates[city_pair[0]],coordinates[city_pair[1]])
-#   score_dict[f"{city_pair[0]} - {city_pair[1]}"] = 1/distance
-#   counter +=1
-#   print(f"{counter} out of {len(city_pairs)} has done")
 
 # Read json file
-with open('cities.json', 'r') as json_file:
+with open('cities_old.json', 'r') as json_file:
     score_dict = json.load(json_file)
 
-# Normalize the result value in score_dict
-max_score = max(score_dict.values())
-max_score_keys = [key for key, value in score_dict.items() if value == max_score]
+sorted_list = sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
+sorted_dict = dict(sorted_list)
+#print(sorted_dict)
+#write_dict_to_json(sorted_dict, 'cities.json')
 
-# print(max_score_keys)
-# print(max_score)
+import matplotlib.pyplot as plt
 
-# sorted_scores = sorted(score_dict.values(), reverse=True)
-# second_highest_score = sorted_scores[1]
+# Divide the sorted_dict into five parts evenly
+n = len(sorted_dict)
+print(f"the numbers of scores are {n}")
+part_size = n // 5
+print(f"the size of each quantile is {part_size}")
+parts = [list(sorted_dict.items())[i:i+part_size] for i in range(0, n, part_size)]
 
-# second_highest_score_keys = [key for key, value in score_dict.items() if value == second_highest_score]
-# print(f"The second highest score is {second_highest_score} with keys: {second_highest_score_keys}")
+# Create a list to store the box plot data
+box_plot_data = []
 
+# Iterate over each part and extract the inverse distances
+for part in parts:
+    distances = [1/inverse_distance for _, inverse_distance in part]
+    box_plot_data.append(distances)
 
-min_score = min(score_dict.values())
-# print(min_score)
-# print(len(score_dict))
+# # Plot the box plots
+# plt.boxplot(box_plot_data)
+# plt.xlabel('Part')
+# plt.ylabel('Inverse Distance')
+# plt.title('Box Plot of Inverse Distances')
+# plt.show()
 
-for key in score_dict:
-    normalized_score = (score_dict[key] - min_score) / (max_score - min_score)
-    score_dict[key] = normalized_score
+#print(f"The distance of the cutoffline in {list(sorted_dict.items())[10][0]} is {1/list(sorted_dict.items())[10][1]} km.")
 
-#print(score_dict)
+Intracities_distance = [1/inverse_distance for cities, inverse_distance in list(sorted_dict.items())[80:87]]
+Cities = [cities for cities, inverse_distance in list(sorted_dict.items())[80:87]]
+Intra_cities = pd.DataFrame({'Cities': Cities, 'Distance': Intracities_distance})
+print(Intra_cities)
 
-highest_score_key = [key for key, value in score_dict.items() if value == 1]
-
-write_dict_to_json(score_dict, 'cities.json')
+Intercities_score = [inverse_distance for cities, inverse_distance in list(sorted_dict.items())[87:]]
+# Plot the histogram
+plt.hist(Intercities_score, bins=10)
+plt.xlabel('Distance')
+plt.ylabel('Frequency')
+plt.title('Distance Distribution')
+plt.show()
