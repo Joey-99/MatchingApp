@@ -1,6 +1,5 @@
 import tkinter
 from tkinter.ttk import Treeview
-from PIL import Image, ImageTk
 
 import Geolocation
 import user_management_new
