@@ -1,6 +1,7 @@
 import tkinter
 from tkinter.ttk import Treeview
 
+import Geolocation
 import user_management_new
 from user_management_new import user_management_new
 from tkinter import messagebox, END
@@ -16,8 +17,8 @@ class GUI:
     def __init__(self, root, store: user_management_new):
         self.root = root
         self.store = store
-        # self.user_id = None
-        self.user_id = 10
+        self.user_id = None
+        # self.user_id = 10
         self.root.title('Two-way Street')
         self.root.geometry(str(width) + "x" + str(height))
 
@@ -117,7 +118,7 @@ class Login:
             return
 
         self.page.pack_forget()
-        Home(self.gui)
+        Menu(self.gui)
 
     def register(self):
         self.page.pack_forget()
@@ -237,7 +238,7 @@ class LikeAndDislike:
 
     def back(self):
         self.page.pack_forget()
-        Home(self.gui)
+        Menu(self.gui)
 
 
 class Register:
@@ -294,6 +295,36 @@ class Register:
 
         self.political_orientation_input.set(user.politics)
         self.dating_intentions_input.set(user.intentions)
+
+    def callback(self, user: User, state,
+                 username, password, name, age, gender, location, education, interests, politics,
+                 intentions, preferred_genders, age_low, age_high):
+        self.user = user
+        self.state = state
+        self.username_input.insert(0, username)
+        self.password_input.insert(0, password)
+        self.name_input.insert(0, name)
+        self.age_input.insert(0, age)
+        self.location_input.set(location)
+        self.gender_input.set(gender[0])
+        self.preferred_age_low_input.insert(0, age_low)
+        self.preferred_age_high_input.insert(0, age_high)
+        self.education_level_input.set(education)
+
+        for value in interests:
+            for interests in self.interests_input:
+                if value == interests['value']:
+                    interests['select'].set(1)
+
+        if 'M' in preferred_genders:
+            self.preferred_gender_m_input.set(1)
+        if 'F' in preferred_genders:
+            self.preferred_gender_f_input.set(1)
+        if 'O' in preferred_genders:
+            self.preferred_gender_o_input.set(1)
+
+        self.political_orientation_input.set(politics)
+        self.dating_intentions_input.set(intentions)
 
     def init(self):
         self.page = tkinter.Frame(self.gui.root, width=width, height=height, bg='white')
@@ -368,18 +399,19 @@ class Register:
         )
 
         self.location_input = tkinter.ttk.Combobox(self.page, state='readonly')
-        self.location_input['values'] = (
-            'Toronto',
-            'Ottawa',
-            'Mississauga',
-            'Brampton',
-            'Hamilton',
-            'London',
-            'Markham',
-            'Vaughan',
-            'Kitchener',
-            'Windsor'
-        )
+        # self.location_input['values'] = (
+        #     'Toronto',
+        #     'Ottawa',
+        #     'Mississauga',
+        #     'Brampton',
+        #     'Hamilton',
+        #     'London',
+        #     'Markham',
+        #     'Vaughan',
+        #     'Kitchener',
+        #     'Windsor'
+        # )
+        self.location_input['values'] = Geolocation.cities
         self.location_input.set(self.location_input['values'][0])
         self.location_input.place(
             width=width * 0.3,
@@ -859,7 +891,10 @@ class Register:
 
     def back(self):
         self.page.pack_forget()
-        Login(self.gui)
+        if self.state == 2:
+            Menu(self.gui)
+        else:
+            Login(self.gui)
 
 
 class RegisterNext:
@@ -1012,7 +1047,13 @@ class RegisterNext:
 
     def back(self):
         self.page.pack_forget()
-        Login(self.gui)
+        Register(self.gui).callback(
+            self.user,
+            self.state,
+            self.username, self.password, self.name, self.age, self.gender, self.location,
+            self.education, self.interests, self.politics,
+            self.intentions, self.preferred_genders, self.age_low, self.age_high
+        )
 
 
 class Home:
@@ -1035,8 +1076,8 @@ class Home:
 
         like_btn = tkinter.Button(
             self.page,
-            text="Browse Profiles",
-            command=self.likeAndDislike
+            text="Back",
+            command=self.back
         )
         like_btn.place(
             width=100,
@@ -1045,17 +1086,185 @@ class Home:
             y=10
         )
 
-        # dislike_btn = tkinter.Button(
-        #     self.page,
-        #     text="Dislike",
-        #     command=self.dislike
-        # )
-        # dislike_btn.place(
-        #     width=50,
-        #     height=30,
-        #     x=80,
-        #     y=10
-        # )
+    def reload(self):
+        if self.treeview != None:
+            for child in self.treeview:
+                self.treeview.delete(child)
+        else:
+            columns = ("id", "username", "name", "age", "gender", "location", "preferred_genders", "preferred_age")
+            self.treeview = Treeview(self.excel_page, show="headings", columns=columns, height=25)
+
+            self.treeview.heading("id", text="id")
+            self.treeview.column('id', width=int(width * 0.05))
+            self.treeview.heading("username", text="username")
+            self.treeview.column('username', width=int(width * 0.1))
+            self.treeview.heading("name", text="name")
+            self.treeview.column('name', width=int(width * 0.1))
+            self.treeview.heading("age", text="age")
+            self.treeview.column('age', width=int(width * 0.05))
+            self.treeview.heading("gender", text="gender")
+            self.treeview.column('gender', width=int(width * 0.1))
+            self.treeview.heading("location", text="location")
+            self.treeview.column('location', width=int(width * 0.2))
+            self.treeview.heading("preferred_genders", text="preferred genders")
+            self.treeview.column('preferred_genders', width=int(width * 0.2))
+            self.treeview.heading("preferred_age", text="preferred age")
+            self.treeview.column('preferred_age', width=int(width * 0.2))
+
+            self.scrollbar = tkinter.Scrollbar(
+                self.excel_page,
+                orient='vertical',
+                command=self.treeview.yview
+            )
+
+            # self.treeview.place(relx=0.004, rely=0.028, relwidth=0.964, relheight=1)
+            # self.treeview.place(height = 100,relx=0.004, rely=0.028, relwidth=0.964, relheight=1)
+            self.scrollbar.place(relx=0.971, rely=0.028, relwidth=0.024, relheight=0.958)
+            self.treeview.configure(yscrollcommand=self.scrollbar.set)
+
+        users = self.gui.store.get_all_users()
+        for index, user in users.iterrows():
+            self.treeview.insert('', 'end', values=(
+                user['user_id'],
+                user['username'],
+                user['name'],
+                user['age'],
+                user['gender'],
+                user['location'],
+                user['preferred_genders'],
+                str(user['age_low']) + '-' + str(user['age_high']),
+            ))
+
+        self.treeview.pack()
+
+    def back(self):
+        self.excel_page.pack_forget()
+        self.page.pack_forget()
+        Menu(self.gui)
+
+
+class HomeMatch:
+    def __init__(self, gui: GUI, ids):
+        self.scrollbar = None
+        self.excel_page = None
+        self.page = None
+        self.gui = gui
+        self.treeview = None
+        self.ids = ids
+        self.init()
+
+    def init(self):
+        self.excel_page = tkinter.Frame(self.gui.root, width=width, height=height * 0.8, bg='white')
+        self.page = tkinter.Frame(self.gui.root, width=width, height=height * 0.2, bg='white')
+
+        self.excel_page.pack()
+        self.page.pack()
+
+        self.reload()
+
+        like_btn = tkinter.Button(
+            self.page,
+            text="Back",
+            command=self.back
+        )
+        like_btn.place(
+            width=100,
+            height=30,
+            x=10,
+            y=10
+        )
+
+    def reload(self):
+        if self.treeview != None:
+            for child in self.treeview:
+                self.treeview.delete(child)
+        else:
+            columns = ("id", "username", "name", "age", "gender", "location", "preferred_genders", "preferred_age")
+            self.treeview = Treeview(self.excel_page, show="headings", columns=columns, height=25)
+
+            self.treeview.heading("id", text="id")
+            self.treeview.column('id', width=int(width * 0.05))
+            self.treeview.heading("username", text="username")
+            self.treeview.column('username', width=int(width * 0.1))
+            self.treeview.heading("name", text="name")
+            self.treeview.column('name', width=int(width * 0.1))
+            self.treeview.heading("age", text="age")
+            self.treeview.column('age', width=int(width * 0.05))
+            self.treeview.heading("gender", text="gender")
+            self.treeview.column('gender', width=int(width * 0.1))
+            self.treeview.heading("location", text="location")
+            self.treeview.column('location', width=int(width * 0.2))
+            self.treeview.heading("preferred_genders", text="preferred genders")
+            self.treeview.column('preferred_genders', width=int(width * 0.2))
+            self.treeview.heading("preferred_age", text="preferred age")
+            self.treeview.column('preferred_age', width=int(width * 0.2))
+
+            self.scrollbar = tkinter.Scrollbar(
+                self.excel_page,
+                orient='vertical',
+                command=self.treeview.yview
+            )
+
+            # self.treeview.place(relx=0.004, rely=0.028, relwidth=0.964, relheight=1)
+            # self.treeview.place(height = 100,relx=0.004, rely=0.028, relwidth=0.964, relheight=1)
+            self.scrollbar.place(relx=0.971, rely=0.028, relwidth=0.024, relheight=0.958)
+            self.treeview.configure(yscrollcommand=self.scrollbar.set)
+
+        users = self.gui.store.get_all_users()
+        for index, user in users.iterrows():
+            if user['user_id'] in self.ids:
+                self.treeview.insert('', 'end', values=(
+                    user['user_id'],
+                    user['username'],
+                    user['name'],
+                    user['age'],
+                    user['gender'],
+                    user['location'],
+                    user['preferred_genders'],
+                    str(user['age_low']) + '-' + str(user['age_high']),
+                ))
+
+        self.treeview.pack()
+
+    def back(self):
+        self.excel_page.pack_forget()
+        self.page.pack_forget()
+        Menu(self.gui)
+
+
+class Menu:
+    def __init__(self, gui: GUI):
+        self.page = None
+        self.gui = gui
+        self.init()
+
+    def init(self):
+        self.page = tkinter.Frame(self.gui.root, width=width, height=height, bg='white')
+        self.page.pack()
+
+        like_btn = tkinter.Button(
+            self.page,
+            text="View all profiles",
+            command=self.gotoAll
+        )
+        like_btn.place(
+            width=width * 0.2,
+            height=height * 0.1,
+            x=width * 0.4,
+            y=height * 0.0
+        )
+
+        like_btn = tkinter.Button(
+            self.page,
+            text="Browse Profiles",
+            command=self.likeAndDislike
+        )
+        like_btn.place(
+            width=width * 0.2,
+            height=height * 0.1,
+            x=width * 0.4,
+            y=height * 0.15
+        )
 
         show_like_dislike_btn = tkinter.Button(
             self.page,
@@ -1063,10 +1272,10 @@ class Home:
             command=self.show_like_dislike
         )
         show_like_dislike_btn.place(
-            width=180,
-            height=30,
-            x=140,
-            y=10
+            width=width * 0.2,
+            height=height * 0.1,
+            x=width * 0.4,
+            y=height * 0.30
         )
 
         logout_btn = tkinter.Button(
@@ -1075,10 +1284,10 @@ class Home:
             command=self.logout
         )
         logout_btn.place(
-            width=50,
-            height=30,
-            x=350,
-            y=10
+            width=width * 0.2,
+            height=height * 0.1,
+            x=width * 0.4,
+            y=height * 0.85
         )
 
         # logout_btn = tkinter.Button(
@@ -1099,10 +1308,10 @@ class Home:
             command=self.deleteProfiles
         )
         logout_btn.place(
-            width=100,
-            height=30,
-            x=430,
-            y=10
+            width=width * 0.2,
+            height=height * 0.1,
+            x=width * 0.4,
+            y=height * 0.45
         )
 
         logout_btn = tkinter.Button(
@@ -1111,10 +1320,10 @@ class Home:
             command=self.editProfiles
         )
         logout_btn.place(
-            width=100,
-            height=30,
-            x=550,
-            y=10
+            width=width * 0.2,
+            height=height * 0.1,
+            x=width * 0.4,
+            y=height * 0.6
         )
 
     def reload(self):
@@ -1178,12 +1387,14 @@ class Home:
         like_userids = self.gui.store.evaluate_matches(self.gui.user_id)
         msg = 'user_id is '
         fist = True
+        ids = []
         for index, user in like_userids.iterrows():
             if fist is True:
                 fist = False
             else:
                 msg = msg + ", "
             msg = msg + str(user['user_id'])
+            ids.append(user['user_id'])
         # like_str = "liked:"
         # fist = True
         # for userid in like_userids:
@@ -1205,7 +1416,10 @@ class Home:
         #     dislike_str = dislike_str + str(userid)
         if fist is True:
             msg = "Empty"
-        messagebox.showinfo("See matchs", msg)
+            messagebox.showinfo("See matchs", msg)
+            return
+        self.page.pack_forget()
+        HomeMatch(self.gui, ids)
 
     # def dislike(self):
     #     selected_items = self.treeview.selection()
@@ -1214,12 +1428,10 @@ class Home:
     #         self.gui.store.dislike_profile(user_id, self.gui.user_id)
 
     def likeAndDislike(self):
-        self.excel_page.pack_forget()
         self.page.pack_forget()
         LikeAndDislike(self.gui)
 
     def logout(self):
-        self.excel_page.pack_forget()
         self.page.pack_forget()
         Login(self.gui)
 
@@ -1244,12 +1456,17 @@ class Home:
         messagebox.showinfo("Info", msg)
 
     def deleteProfiles(self):
-        self.gui.store.delete_user_from_db(self.gui.user_id)
-        self.logout()
+        delete = (messagebox.askokcancel('Delete', 'Delete?'))
+        if delete:
+            self.gui.store.delete_user_from_db(self.gui.user_id)
+            self.logout()
+
+    def gotoAll(self):
+        self.page.pack_forget()
+        Home(self.gui)
 
     def editProfiles(self):
         user = self.gui.store.get_user_info(self.gui.user_id)
-        self.excel_page.pack_forget()
         self.page.pack_forget()
         Register(self.gui).change(user)
 
@@ -1259,6 +1476,7 @@ def start():
     store = user_management_new()
     gui = GUI(root, store)
     Login(gui)
+    # Menu(gui)
     # RegisterNext(
     #     gui,
     #     None, None, None, None, None,
