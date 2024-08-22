@@ -36,7 +36,7 @@ def get_interests_score(users_interests, interests):
     return intersect/union
 
 
-with open('cities.json', 'r') as json_file:
+with open('cities_ranked.json', 'r') as json_file:
     distance_score = json.load(json_file)
 
 distance_score_1 = dict(list(distance_score.items())[:87]) # Think of the cut-off line between the cities distances.
