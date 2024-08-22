@@ -39,17 +39,31 @@ def get_interests_score(users_interests, interests):
 with open('cities.json', 'r') as json_file:
     distance_score = json.load(json_file)
 
+distance_score_1 = dict(list(distance_score.items())[:87]) # Think of the cut-off line between the cities distances.
+
+distance_score_2 = dict(list(distance_score.items())[87:])
+
+max_score = max(distance_score_2.values())
+min_score = min(distance_score_2.values())
+
+for key in distance_score_2:
+    normalized_score = (distance_score_2[key] - min_score) / (max_score - min_score)
+    distance_score_2[key] = normalized_score
+
 def get_location_score(users_location, location):
-    if users_location == location:
+    name_1 = f'{users_location} - {location}'
+    name_2 = f'{location} - {users_location}'
+    
+    if users_location == location or name_1 in distance_score_1 or name_2 in distance_score_1:
         return 1
     else:
         try:
-            score = distance_score[f'{users_location} - {location}']
+            score = distance_score_2[f'{users_location} - {location}']
             return score
         except KeyError:
             try:
             # If that fails, try the reverse combination
-                score = distance_score[f'{location} - {users_location}']
+                score = distance_score_2[f'{location} - {users_location}']
                 return score
             except KeyError:
             # Handle the case where neither key is found
