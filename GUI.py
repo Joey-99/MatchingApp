@@ -1,5 +1,6 @@
 import tkinter
 from tkinter.ttk import Treeview
+from PIL import Image, ImageTk
 
 import Geolocation
 import user_management_new
@@ -35,6 +36,9 @@ class Login:
         self.page = tkinter.Frame(self.gui.root, width=width, height=height, bg='white')
         self.page.pack()
 
+        image_label = tkinter.Label(self.page, text='TWO-WAY STREET <3', font=("Helvetica", 36), anchor='n', width=width, height=int(height*0.5))
+        image_label.pack()
+
         username = tkinter.Label(self.page, text="Username")
         username.place(
             width=100,
@@ -59,7 +63,7 @@ class Login:
             y=height * 0.45
         )
 
-        self.password_input = tkinter.Entry(self.page)
+        self.password_input = tkinter.Entry(self.page, show='*')
         self.password_input.place(
             width=width * 0.3,
             height=30,
@@ -352,7 +356,7 @@ class Register:
             x=width * 0.2,
             y=height * 0.06
         )
-        self.password_input = tkinter.Entry(self.page)
+        self.password_input = tkinter.Entry(self.page, show='*')
         self.password_input.place(
             width=width * 0.3,
             height=30,
@@ -1091,13 +1095,9 @@ class Home:
             for child in self.treeview:
                 self.treeview.delete(child)
         else:
-            columns = ("id", "username", "name", "age", "gender", "location", "preferred_genders", "preferred_age")
+            columns = ("name", "age", "gender", "location", "education", "interests", "politics", "intentions")
             self.treeview = Treeview(self.excel_page, show="headings", columns=columns, height=25)
 
-            self.treeview.heading("id", text="id")
-            self.treeview.column('id', width=int(width * 0.05))
-            self.treeview.heading("username", text="username")
-            self.treeview.column('username', width=int(width * 0.1))
             self.treeview.heading("name", text="name")
             self.treeview.column('name', width=int(width * 0.1))
             self.treeview.heading("age", text="age")
@@ -1105,11 +1105,16 @@ class Home:
             self.treeview.heading("gender", text="gender")
             self.treeview.column('gender', width=int(width * 0.1))
             self.treeview.heading("location", text="location")
-            self.treeview.column('location', width=int(width * 0.2))
-            self.treeview.heading("preferred_genders", text="preferred genders")
-            self.treeview.column('preferred_genders', width=int(width * 0.2))
-            self.treeview.heading("preferred_age", text="preferred age")
-            self.treeview.column('preferred_age', width=int(width * 0.2))
+            self.treeview.column('location', width=int(width * 0.1))
+            self.treeview.heading("education", text="education")
+            self.treeview.column('education', width=int(width * 0.1))
+            self.treeview.heading("interests", text="interests")
+            self.treeview.column('interests', width=int(width * 0.35))
+            self.treeview.heading("politics", text="politics")
+            self.treeview.column('politics', width=int(width * 0.1))
+            self.treeview.heading("intentions", text="intentions")
+            self.treeview.column('intentions', width=int(width * 0.1))
+            
 
             self.scrollbar = tkinter.Scrollbar(
                 self.excel_page,
@@ -1125,14 +1130,14 @@ class Home:
         users = self.gui.store.get_all_users()
         for index, user in users.iterrows():
             self.treeview.insert('', 'end', values=(
-                user['user_id'],
-                user['username'],
                 user['name'],
                 user['age'],
                 user['gender'],
                 user['location'],
-                user['preferred_genders'],
-                str(user['age_low']) + '-' + str(user['age_high']),
+                user['education'],
+                user['interests'],
+                user['politics'],
+                user['intentions']
             ))
 
         self.treeview.pack()
@@ -1179,13 +1184,9 @@ class HomeMatch:
             for child in self.treeview:
                 self.treeview.delete(child)
         else:
-            columns = ("id", "username", "name", "age", "gender", "location", "preferred_genders", "preferred_age")
+            columns = ("name", "age", "gender", "location", "education", "interests", "politics", "intentions")
             self.treeview = Treeview(self.excel_page, show="headings", columns=columns, height=25)
 
-            self.treeview.heading("id", text="id")
-            self.treeview.column('id', width=int(width * 0.05))
-            self.treeview.heading("username", text="username")
-            self.treeview.column('username', width=int(width * 0.1))
             self.treeview.heading("name", text="name")
             self.treeview.column('name', width=int(width * 0.1))
             self.treeview.heading("age", text="age")
@@ -1193,11 +1194,15 @@ class HomeMatch:
             self.treeview.heading("gender", text="gender")
             self.treeview.column('gender', width=int(width * 0.1))
             self.treeview.heading("location", text="location")
-            self.treeview.column('location', width=int(width * 0.2))
-            self.treeview.heading("preferred_genders", text="preferred genders")
-            self.treeview.column('preferred_genders', width=int(width * 0.2))
-            self.treeview.heading("preferred_age", text="preferred age")
-            self.treeview.column('preferred_age', width=int(width * 0.2))
+            self.treeview.column('location', width=int(width * 0.1))
+            self.treeview.heading("education", text="education")
+            self.treeview.column('education', width=int(width * 0.1))
+            self.treeview.heading("interests", text="interests")
+            self.treeview.column('interests', width=int(width * 0.35))
+            self.treeview.heading("politics", text="politics")
+            self.treeview.column('politics', width=int(width * 0.1))
+            self.treeview.heading("intentions", text="intentions")
+            self.treeview.column('intentions', width=int(width * 0.1))
 
             self.scrollbar = tkinter.Scrollbar(
                 self.excel_page,
@@ -1214,15 +1219,15 @@ class HomeMatch:
         for index, user in users.iterrows():
             if user['user_id'] in self.ids:
                 self.treeview.insert('', 'end', values=(
-                    user['user_id'],
-                    user['username'],
-                    user['name'],
-                    user['age'],
-                    user['gender'],
-                    user['location'],
-                    user['preferred_genders'],
-                    str(user['age_low']) + '-' + str(user['age_high']),
-                ))
+                user['name'],
+                user['age'],
+                user['gender'],
+                user['location'],
+                user['education'],
+                user['interests'],
+                user['politics'],
+                user['intentions']
+            ))
 
         self.treeview.pack()
 
@@ -1242,6 +1247,12 @@ class Menu:
         self.page = tkinter.Frame(self.gui.root, width=width, height=height, bg='white')
         self.page.pack()
 
+        name = self.gui.store.get_user_info(self.gui.user_id).name
+        image_label = tkinter.Label(self.page, text=f'Welcome {name}! Please select an option from the below menu:', font=("Helvetica", 20), anchor='n', 
+                                    width=width,
+                                    height=int(height * 0.1))
+        image_label.pack()
+
         like_btn = tkinter.Button(
             self.page,
             text="View all profiles",
@@ -1251,7 +1262,7 @@ class Menu:
             width=width * 0.2,
             height=height * 0.1,
             x=width * 0.4,
-            y=height * 0.0
+            y=height * 0.1
         )
 
         like_btn = tkinter.Button(
@@ -1263,7 +1274,7 @@ class Menu:
             width=width * 0.2,
             height=height * 0.1,
             x=width * 0.4,
-            y=height * 0.15
+            y=height * 0.25
         )
 
         show_like_dislike_btn = tkinter.Button(
@@ -1275,7 +1286,7 @@ class Menu:
             width=width * 0.2,
             height=height * 0.1,
             x=width * 0.4,
-            y=height * 0.30
+            y=height * 0.40
         )
 
         logout_btn = tkinter.Button(
@@ -1287,7 +1298,7 @@ class Menu:
             width=width * 0.2,
             height=height * 0.1,
             x=width * 0.4,
-            y=height * 0.85
+            y=height * 0.87
         )
 
         # logout_btn = tkinter.Button(
@@ -1311,7 +1322,7 @@ class Menu:
             width=width * 0.2,
             height=height * 0.1,
             x=width * 0.4,
-            y=height * 0.45
+            y=height * 0.55
         )
 
         logout_btn = tkinter.Button(
@@ -1323,7 +1334,7 @@ class Menu:
             width=width * 0.2,
             height=height * 0.1,
             x=width * 0.4,
-            y=height * 0.6
+            y=height * 0.7
         )
 
     def reload(self):
@@ -1331,13 +1342,9 @@ class Menu:
             for child in self.treeview:
                 self.treeview.delete(child)
         else:
-            columns = ("id", "username", "name", "age", "gender", "location", "preferred_genders", "preferred_age")
+            columns = ("name", "age", "gender", "location", "education", "interests", "politics", "intentions")
             self.treeview = Treeview(self.excel_page, show="headings", columns=columns, height=25)
 
-            self.treeview.heading("id", text="id")
-            self.treeview.column('id', width=int(width * 0.05))
-            self.treeview.heading("username", text="username")
-            self.treeview.column('username', width=int(width * 0.1))
             self.treeview.heading("name", text="name")
             self.treeview.column('name', width=int(width * 0.1))
             self.treeview.heading("age", text="age")
@@ -1345,11 +1352,15 @@ class Menu:
             self.treeview.heading("gender", text="gender")
             self.treeview.column('gender', width=int(width * 0.1))
             self.treeview.heading("location", text="location")
-            self.treeview.column('location', width=int(width * 0.2))
-            self.treeview.heading("preferred_genders", text="preferred genders")
-            self.treeview.column('preferred_genders', width=int(width * 0.2))
-            self.treeview.heading("preferred_age", text="preferred age")
-            self.treeview.column('preferred_age', width=int(width * 0.2))
+            self.treeview.column('location', width=int(width * 0.1))
+            self.treeview.heading("education", text="education")
+            self.treeview.column('education', width=int(width * 0.1))
+            self.treeview.heading("interests", text="interests")
+            self.treeview.column('interests', width=int(width * 0.35))
+            self.treeview.heading("politics", text="politics")
+            self.treeview.column('politics', width=int(width * 0.1))
+            self.treeview.heading("intentions", text="intentions")
+            self.treeview.column('intentions', width=int(width * 0.1))
 
             self.scrollbar = tkinter.Scrollbar(
                 self.excel_page,
@@ -1365,14 +1376,14 @@ class Menu:
         users = self.gui.store.get_all_users()
         for index, user in users.iterrows():
             self.treeview.insert('', 'end', values=(
-                user['user_id'],
-                user['username'],
                 user['name'],
                 user['age'],
                 user['gender'],
                 user['location'],
-                user['preferred_genders'],
-                str(user['age_low']) + '-' + str(user['age_high']),
+                user['education'],
+                user['interests'],
+                user['politics'],
+                user['intentions']
             ))
 
         self.treeview.pack()

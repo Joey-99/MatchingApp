@@ -1,7 +1,7 @@
 import GUI
 from user_management_new import user_management_new
 
-COLUMNS_TO_SHOW = ['name', 'age', 'gender', 'location', "interests"]
+COLUMNS_TO_SHOW = ['name', 'age', 'gender', 'location', 'education', 'interests', 'politics', 'intentions']
 
 def get_username():
     username = input("\nPlease enter a username (minimum length of 5 characters): ")
