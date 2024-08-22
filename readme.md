@@ -13,17 +13,17 @@ Users are ranked with each other based on several factors and are matched when b
 
 ### Files
 
-- **`Main_new.py`**: This is the main program file that integrates all other files. It contains the core program and functions that prompt user input while leveraging functions from other classes such as `user_management_new` and `user`. It also includes the algorithm used for our matching mechanism. This file is later used by `GUI.py` to produce the user interface for the program.
+- **`main_new.py`**: This is the main program file that integrates all other files. It contains the core program and functions that prompt user input while leveraging functions from other classes such as `user_management_new` and `user`. It also includes the algorithm used for our matching mechanism. This file is later used by `GUI.py` to produce the user interface for the program.
 
 - **`GUI.py`**: This file contains all the necessary code to produce a graphical user interface. It utilizes the Python library Tkinter and is based solely on the logic, algorithm, and program contained in `Main_new.py`.
 
-- **`User_management_new.py`**: This file primarily manages the user database. It contains all the necessary code to connect Python with SQLite, such as establishing user tables, as well as functions to create, edit, delete, and update user records.
+- **`user_management_new.py`**: This file primarily manages the user database. It contains all the necessary code to connect Python with SQLite, such as establishing user tables, as well as functions to create, edit, delete, and update user records.
 
 - **`User.py`**: This file sets up the necessary information needed for a user profile, which will be used later in other classes.
 
-- **`Matching_helpers.py`**: This file includes two functions that are used to calculate the interest score and the age score for our matching algorithm.
+- **`matching_helpers.py`**: This file includes two functions that are used to calculate the interest score and the age score for our matching algorithm.
 
-- **`Test_create_users.py`**: This file contains code to quickly create up to 20 random users for testing purposes.
+- **`test_create_users.py`**: This file contains code to quickly create up to 20(changeable) random users for testing purposes.
 
 ## Usage
 
@@ -69,4 +69,4 @@ We have established 3 tables in our SQLite database:
 
 ### 4.3 Calculating Distance
 
-Due to slow real-time processing caused by the OpenCage API, we use a dictionary of location and distance stored in a JSON file for calculating distances in the algorithm.
+Due to slow real-time processing caused by the OpenCage API, we use a dictionary of location and distance obtained via OpenCage API, stored in a JSON file for calculating distances in the algorithm.
