@@ -302,7 +302,7 @@ class user_management_new:
         age_low = int(actual_user['age_low'].values[0])
         age_high = int(actual_user['age_high'].values[0])
         interests = set(actual_user['interests'].values[0])
-        location = actual_user['location'].values[0].lower()
+        location = actual_user['location'].values[0]
         education = actual_user['education'].values[0]
         politics = actual_user['politics'].values[0]
         intention = actual_user['intentions'].values[0]
@@ -313,7 +313,7 @@ class user_management_new:
 
         seen_filtered['age_score'] = seen_filtered['age'].apply(lambda x: get_age_score(x, age_low, age_high))
         seen_filtered['interest_score'] = seen_filtered['interests'].apply(lambda x: get_interests_score(x, interests))
-        seen_filtered['location_score'] = np.where(seen_filtered['location'].str.lower() == location, 1, 0)
+        seen_filtered['location_score'] = seen_filtered['location'].apply(lambda x: get_location_score(x,location))
         seen_filtered['education_score'] = np.where(seen_filtered['education'] == education, 1, 0)
         seen_filtered['politics_score'] = np.where(seen_filtered['politics'] == politics, 1, 0)
         seen_filtered['intention_score'] = np.where(seen_filtered['intentions'] == intention, 1, 0)

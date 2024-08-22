@@ -1,5 +1,6 @@
 #from geopy.geocoders import OpenCage
 #from geopy.distance import geodesic
+import json
 
 AGE_THRESHOLD = 3
 
@@ -33,3 +34,26 @@ def get_interests_score(users_interests, interests):
     intersect = len(set(users_interests).intersection(interests))
     union = len(set(users_interests).union(interests))
     return intersect/union
+
+
+with open('cities.json', 'r') as json_file:
+    distance_score = json.load(json_file)
+
+def get_location_score(users_location, location):
+    if users_location == location:
+        return 1
+    else:
+        try:
+            score = distance_score[f'{users_location} - {location}']
+            return score
+        except KeyError:
+            try:
+            # If that fails, try the reverse combination
+                score = distance_score[f'{location} - {users_location}']
+                return score
+            except KeyError:
+            # Handle the case where neither key is found
+                print(f"Warning: No distance score found for {users_location} and {location}")
+                return 0
+
+        
