@@ -9,7 +9,7 @@ Users are ranked with each other based on several factors and are matched when b
 
 1. **Download the entire repository** and place it in your desired folder.
 2. **Prerequisite**: Python 3.x
-3. **Required Packages**: Tkinter, Pandas, Numpy
+3. **Required Packages**: requirements.txt
 
 ### Files
 
@@ -31,9 +31,10 @@ Users are ranked with each other based on several factors and are matched when b
 
 After downloading the repository, you can:
 
-- **Run the GUI**: Double-click on `GUI.py` to start the program, or type `gui` in the terminal.
-- **Use the command line**: Run the main file and interact with the program through the terminal.
-
+- Run the main_new.py file
+  - **Run the GUI**: Type `gui` in the main_new program
+  - **Use the command line**: Interact with the command line prompts in the main_new program
+    
 ### 2.2 User Manual/GUI
 
 #### 2.2.1 Managing Account
