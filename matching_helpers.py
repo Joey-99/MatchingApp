@@ -39,7 +39,7 @@ def get_interests_score(users_interests, interests):
 with open('cities_ranked.json', 'r') as json_file:
     distance_score = json.load(json_file)
 
-distance_score_1 = dict(list(distance_score.items())[:87]) # Think of the cut-off line between the cities distances.
+distance_score_1 = dict(list(distance_score.items())[:87]) # The cut-off line is 80km, run Geolocation.py to see the box-plot and the distribution plot of distances beyond 80km.
 
 distance_score_2 = dict(list(distance_score.items())[87:])
 
