@@ -6,12 +6,8 @@ def write_dict_to_json(dictionary, filename):
         json.dump(dictionary, json_file, indent=4)
 
 # Read json file
-with open('cities_old.json', 'r') as json_file:
-    score_dict = json.load(json_file)
-
-# Sort the dictionary by values
-sorted_list = sorted(score_dict.items(), key=lambda x: x[1], reverse=True)
-sorted_dict = dict(sorted_list)
+with open('cities_ranked.json', 'r') as json_file:
+    sorted_dict = json.load(json_file)
 
 
 # Divide the sorted cities distance into five quantiles
