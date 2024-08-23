@@ -418,7 +418,7 @@ class Register:
         #     'Kitchener',
         #     'Windsor'
         # )
-        self.location_input['values'] = Geolocation.cities
+        self.location_input['values'] = Geolocation.ontario_cities
         self.location_input.set(self.location_input['values'][0])
         self.location_input.place(
             width=width * 0.3,

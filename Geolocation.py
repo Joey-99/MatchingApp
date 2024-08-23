@@ -1,6 +1,39 @@
 import json
 import pandas as pd
 
+ontario_cities = [
+    "Toronto",
+    "Ottawa",
+    "Mississauga",
+    "Brampton",
+    "Hamilton",
+    "London",
+    "Markham",
+    "Vaughan",
+    "Kitchener",
+    "Windsor",
+    "Richmond Hill",
+    "Burlington",
+    "Oshawa",
+    "Greater Sudbury",
+    "Barrie",
+    "Guelph",
+    "Cambridge",
+    "St. Catharines",
+    "Waterloo",
+    "Thunder Bay",
+    "Brantford",
+    "Pickering",
+    "Niagara Falls",
+    "Peterborough",
+    "Sault Ste. Marie",
+    "Sarnia",
+    "Norfolk County",
+    "Welland",
+    "Belleville",
+    "North Bay"
+]
+
 def write_dict_to_json(dictionary, filename):
     with open(filename, 'w') as json_file:
         json.dump(dictionary, json_file, indent=4)
