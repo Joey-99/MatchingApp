@@ -25,6 +25,8 @@ Users are ranked with each other based on several factors and are matched when b
 
 - **`test_create_users.py`**: This file contains code to quickly create up to 20(changeable) random users for testing purposes.
 
+- **`cities_ranked.json.py`**: This file contains the distance score between city paires and ranked by their score value. The score is calculated by 1/x, x is the distance between two cities in km.
+
 ## Usage
 
 ### 2.1 Running the Program
@@ -71,3 +73,5 @@ We have established 3 tables in our SQLite database:
 ### 4.3 Calculating Distance
 
 Due to slow real-time processing caused by the OpenCage API, we use a dictionary of location and distance obtained via OpenCage API, stored in a JSON file for calculating distances in the algorithm.
+
+The cut-off in matching algorithm is intended to seperate the cities groups based on their distance. So, we can give the appropriate weight to cities that near each other (>71km).
