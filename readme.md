@@ -60,18 +60,18 @@ After downloading the repository, you can:
 
 ## Additional Documentation
 
-### 4.1 Matching Algorithm
+### 3.1 Matching Algorithm
 
 Our matching algorithm utilizes a compound compatibility score that considers a total of 7 factors: age preferences, common interests, geographic location, education level, political views, and dating intentions. These factors are assigned weights by the user or set to default weights and are used to rank and push profiles to the user.
 
 The cut-off distance (71km) in matching algorithm is intended to seperate the cities groups based on their distance. So, we can give the appropriate weight to cities that close to each other (<71km), near each other but not too far away (71km to 200km), and far away from each other (>200km). The furthur the distance, the lower the score they will get.
 
-### 4.2 SQLite Databases
+### 3.2 SQLite Databases
 
 We have established 3 tables in our SQLite database:
 - **`users`**: Stores user-related information such as user ID, interests, etc.
 - **`likes`** and **`dislikes`**: These tables record interactions between users and are used in the matching process.
 
-### 4.3 Calculating Distance
+### 3.3 Calculating Distance
 
 Due to slow real-time processing caused by the OpenCage API, we use a dictionary of location and distance obtained via OpenCage API, stored in a JSON file for calculating distances in the algorithm.
