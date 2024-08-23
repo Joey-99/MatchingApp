@@ -43,6 +43,7 @@ ontario_cities = [
     "North Bay"
 ]
 
+# manage main window and navigations to login and register
 class GUI:
 
     def __init__(self, root, store: user_management_new):
@@ -53,10 +54,10 @@ class GUI:
         self.root.title('Two-way Street')
         self.root.geometry(str(width) + "x" + str(height))
 
-
+# logic and interface for login window
 class Login:
     def __init__(self, gui: GUI):
-        self.page = None
+        self.page = None # hold login page
         self.username_input = None
         self.password_input = None
         self.gui = gui
@@ -64,11 +65,11 @@ class Login:
 
     def init(self):
         self.page = tkinter.Frame(self.gui.root, width=width, height=height, bg='white')
-        self.page.pack()
-
+        self.page.pack() # create and display the frame
+        # display application title
         image_label = tkinter.Label(self.page, text='TWO-WAY STREET <3', font=("Helvetica", 36), anchor='n', width=width, height=int(height*0.5))
         image_label.pack()
-
+        # username input label and field
         username = tkinter.Label(self.page, text="Username")
         username.place(
             width=100,
@@ -84,7 +85,7 @@ class Login:
             x=width * 0.4,
             y=height * 0.3
         )
-
+        # password input label and field
         password = tkinter.Label(self.page, text="Password")
         password.place(
             width=100,
@@ -100,7 +101,7 @@ class Login:
             x=width * 0.4,
             y=height * 0.45
         )
-
+        # login button
         login_btn = tkinter.Button(
             self.page,
             text="Login",
@@ -112,7 +113,7 @@ class Login:
             x=(width - 200) / 2,
             y=height * 0.6
         )
-
+        # register button to navigate to registeration screen
         register_btn = tkinter.Button(
             self.page,
             text="Register",
@@ -124,8 +125,9 @@ class Login:
             x=(width - 200) / 2,
             y=height * 0.7
         )
-
+    # login logic when click the login button
     def login(self):
+        # validate username and password
         if self.username_input is None:
             messagebox.showerror("ERROR", "username is None")
             return
@@ -138,27 +140,29 @@ class Login:
         if self.password_input.get().strip() == "":
             messagebox.showerror("ERROR", "password is Empty")
             return
+        # retrieve user data based on the provided username
         try:
             password = self.gui.store.get_user_password(self.username_input.get().strip())
             self.gui.user_id = self.gui.store.get_user_id(self.username_input.get().strip())
         except Exception:
             password = None
             self.gui.user_id = None
+        # verify the retrieved password against the input password
         if password is None:
             messagebox.showerror("ERROR", "username is ERROR")
             return
         if password.strip() != self.password_input.get().strip():
             messagebox.showerror("ERROR", "password is ERROR")
             return
-
+        # if the login is successful, navigate to the main menu screen
         self.page.pack_forget()
         Menu(self.gui)
-
+    # navigate to the registration window when click "Register" button
     def register(self):
         self.page.pack_forget()
         Register(self.gui)
 
-
+# for browsing profiles and choose like or dislike
 class LikeAndDislike:
     def __init__(self, gui: GUI):
         self.page = None
@@ -192,6 +196,7 @@ class LikeAndDislike:
 
             return
 
+        # like button
         like_btn = tkinter.Button(
             self.page,
             text="Like",
@@ -203,6 +208,7 @@ class LikeAndDislike:
             x=width * 0.3,
             y=height * 0.8
         )
+        # dislike button
         dislike_btn = tkinter.Button(
             self.page,
             text="Dislike",
@@ -278,8 +284,9 @@ class LikeAndDislike:
         self.page.pack_forget()
         Menu(self.gui)
 
-
+# register window both for creating and editing profiles
 class Register:
+    # initialize the registration window
     def __init__(self, gui: GUI):
         self.political_orientation_input = None
         self.dating_intentions_input = None
@@ -304,6 +311,7 @@ class Register:
         self.oldUsername = None
         self.user = None
 
+    # change to edit current user
     def change(self, user: User):
         self.user = user
         self.oldUsername = user.username
@@ -334,6 +342,7 @@ class Register:
         self.political_orientation_input.set(user.politics)
         self.dating_intentions_input.set(user.intentions)
 
+    # fill current user info for user to edit
     def callback(self, user: User, state,
                  username, password, name, age, gender, location, education, interests, politics,
                  intentions, preferred_genders, age_low, age_high):
@@ -437,18 +446,6 @@ class Register:
         )
 
         self.location_input = tkinter.ttk.Combobox(self.page, state='readonly')
-        # self.location_input['values'] = (
-        #     'Toronto',
-        #     'Ottawa',
-        #     'Mississauga',
-        #     'Brampton',
-        #     'Hamilton',
-        #     'London',
-        #     'Markham',
-        #     'Vaughan',
-        #     'Kitchener',
-        #     'Windsor'
-        # )
         self.location_input['values'] = ontario_cities
         self.location_input.set(self.location_input['values'][0])
         self.location_input.place(
@@ -787,6 +784,7 @@ class Register:
         )
         dating_intentions_input_lp_radio.select()
 
+        # final submit and return button
         submit_btn = tkinter.Button(
             self.page,
             text="Back",
@@ -810,6 +808,7 @@ class Register:
             y=height * 0.9
         )
 
+    # validate the input data from user and handle register or update
     def submit(self):
 
         if self.username_input.get().strip() == "":
@@ -883,28 +882,6 @@ class Register:
         if (self.preferred_gender_o_input.get() == 1):
             preferred_gender = preferred_gender + 'O'
 
-            # user: User = self.gui.store.create_user(
-            #     username=self.username_input.get().strip(),
-            #     password=self.password_input.get().strip(),
-            #     name=self.name_input.get().strip(),
-            #     age=int(self.age_input.get().strip()),
-            #     gender=self.gender_input.get().strip(),
-            #     location=self.location_input.get().strip(),
-            #     education=self.education_level_input.get().strip(),
-            #     interests=interests,
-            #     politics=self.political_orientation_input.get().strip(),
-            #     intentions=self.dating_intentions_input.get().strip(),
-            #     preferred_genders=preferred_gender,
-            #     age_low=int(self.preferred_age_low_input.get().strip()),
-            #     age_high=int(self.preferred_age_high_input.get().strip()),
-            #     weights=[5, 5, 5, 5, 5, 5, 5]
-            # )
-
-            # if self.gui.store.add_user_to_db(user) == False:
-            #     messagebox.showerror("ERROR", "register ERROR")
-            # else:
-            #     messagebox.showinfo("SUCCESS", "register SUCCESS")
-
         username = self.username_input.get().strip()
         password = self.password_input.get().strip()
         name = self.name_input.get().strip()
@@ -934,7 +911,7 @@ class Register:
         else:
             Login(self.gui)
 
-
+# next page in registration
 class RegisterNext:
     def __init__(self, gui: GUI,
                  username, password, name, age, gender, location, education, interests, politics,
@@ -964,6 +941,7 @@ class RegisterNext:
         self.user = user
         self.state = 2
 
+        # insert weights user want
         index = -1
         for variable in self.variables:
             index += 1
@@ -980,6 +958,7 @@ class RegisterNext:
 
         index = -1
         line = -1
+        # create features and sliders
         for feature in features:
             line += 1
             index += 1
@@ -1004,7 +983,7 @@ class RegisterNext:
                 x=width * 0.4,
                 y=height * 0 + line * 60
             )
-
+        # back button to return last page
         submit_btn = tkinter.Button(
             self.page,
             text="Back",
@@ -1016,6 +995,7 @@ class RegisterNext:
             x=(width - 200) / 2,
             y=height * 0.9 - 60
         )
+        # submit button
         submit_btn = tkinter.Button(
             self.page,
             text="Submit",
@@ -1029,13 +1009,13 @@ class RegisterNext:
         )
 
     def submit(self):
-
+        # save the weights
         weights = []
 
         for variable in self.variables:
             weights.append(variable.get())
         weights.append(max(weights))
-
+        # create or update user profiles
         if self.state == 2:
             self.user.username = self.username
             self.user.password = self.password
@@ -1082,7 +1062,7 @@ class RegisterNext:
                 messagebox.showinfo("SUCCESS", "register SUCCESS")
                 self.page.pack_forget()
                 Login(self.gui)
-
+    # back to last page
     def back(self):
         self.page.pack_forget()
         Register(self.gui).callback(
@@ -1093,7 +1073,7 @@ class RegisterNext:
             self.intentions, self.preferred_genders, self.age_low, self.age_high
         )
 
-
+# display homepage
 class Home:
     def __init__(self, gui: GUI):
         self.scrollbar = None
@@ -1181,7 +1161,7 @@ class Home:
         self.page.pack_forget()
         Menu(self.gui)
 
-
+# display matched users profiles
 class HomeMatch:
     def __init__(self, gui: GUI, ids):
         self.scrollbar = None
@@ -1244,11 +1224,9 @@ class HomeMatch:
                 command=self.treeview.yview
             )
 
-            # self.treeview.place(relx=0.004, rely=0.028, relwidth=0.964, relheight=1)
-            # self.treeview.place(height = 100,relx=0.004, rely=0.028, relwidth=0.964, relheight=1)
             self.scrollbar.place(relx=0.971, rely=0.028, relwidth=0.024, relheight=0.958)
             self.treeview.configure(yscrollcommand=self.scrollbar.set)
-
+        # get all user data and display user we want to show based the id
         users = self.gui.store.get_all_users()
         for index, user in users.iterrows():
             if user['user_id'] in self.ids:
@@ -1270,7 +1248,7 @@ class HomeMatch:
         self.page.pack_forget()
         Menu(self.gui)
 
-
+# display and manage main menu
 class Menu:
     def __init__(self, gui: GUI):
         self.page = None
@@ -1280,13 +1258,13 @@ class Menu:
     def init(self):
         self.page = tkinter.Frame(self.gui.root, width=width, height=height, bg='white')
         self.page.pack()
-
+        # get all username and welcome
         name = self.gui.store.get_user_info(self.gui.user_id).name
         image_label = tkinter.Label(self.page, text=f'Welcome {name}! Please select an option from the below menu:', font=("Helvetica", 20), anchor='n', 
                                     width=width,
                                     height=int(height * 0.1))
         image_label.pack()
-
+        # view all user profiles
         like_btn = tkinter.Button(
             self.page,
             text="View all profiles",
@@ -1298,7 +1276,7 @@ class Menu:
             x=width * 0.4,
             y=height * 0.1
         )
-
+        # browse profiles
         like_btn = tkinter.Button(
             self.page,
             text="Browse Profiles",
@@ -1310,7 +1288,7 @@ class Menu:
             x=width * 0.4,
             y=height * 0.25
         )
-
+        # view matched user profiles
         show_like_dislike_btn = tkinter.Button(
             self.page,
             text="View Matches",
@@ -1322,7 +1300,7 @@ class Menu:
             x=width * 0.4,
             y=height * 0.40
         )
-
+        # logout
         logout_btn = tkinter.Button(
             self.page,
             text="Logout",
@@ -1334,19 +1312,7 @@ class Menu:
             x=width * 0.4,
             y=height * 0.87
         )
-
-        # logout_btn = tkinter.Button(
-        #     self.page,
-        #     text="Browse Profiles",
-        #     command=self.browseProfiles
-        # )
-        # logout_btn.place(
-        #     width=100,
-        #     height=30,
-        #     x=430,
-        #     y=10
-        # )
-
+        # delete user profiles
         logout_btn = tkinter.Button(
             self.page,
             text="Delete Profiles",
@@ -1358,7 +1324,7 @@ class Menu:
             x=width * 0.4,
             y=height * 0.55
         )
-
+        # edit user profiles
         logout_btn = tkinter.Button(
             self.page,
             text="Edit Profile",
@@ -1370,7 +1336,7 @@ class Menu:
             x=width * 0.4,
             y=height * 0.7
         )
-
+    # reload table
     def reload(self):
         if self.treeview != None:
             for child in self.treeview:
@@ -1422,12 +1388,6 @@ class Menu:
 
         self.treeview.pack()
 
-    # def like(self):
-    #     selected_items = self.treeview.selection()
-    #     for item in selected_items:
-    #         user_id = self.treeview.item(item, 'values')[0]
-    #         self.gui.store.like_profile(user_id, self.gui.user_id)
-
     def show_like_dislike(self):
         like_userids = self.gui.store.evaluate_matches(self.gui.user_id)
         msg = 'user_id is '
@@ -1440,25 +1400,7 @@ class Menu:
                 msg = msg + ", "
             msg = msg + str(user['user_id'])
             ids.append(user['user_id'])
-        # like_str = "liked:"
-        # fist = True
-        # for userid in like_userids:
-        #     if fist is True:
-        #         fist = False
-        #     else:
-        #         like_str = like_str + ", "
-        #     like_str = like_str + str(userid)
-        # if fist is True:
-        #     like_str = like_str + "Empty"
-        # dislike_userids = self.gui.store.get_disliked_profiles(self.gui.user_id)
-        # dislike_str = "disliked:"
-        # fist = True
-        # for userid in dislike_userids:
-        #     if fist is True:
-        #         fist = False
-        #     else:
-        #         dislike_str = dislike_str + ", "
-        #     dislike_str = dislike_str + str(userid)
+    
         if fist is True:
             msg = "Empty"
             messagebox.showinfo("See matchs", msg)
@@ -1466,11 +1408,6 @@ class Menu:
         self.page.pack_forget()
         HomeMatch(self.gui, ids)
 
-    # def dislike(self):
-    #     selected_items = self.treeview.selection()
-    #     for item in selected_items:
-    #         user_id = self.treeview.item(item, 'values')[0]
-    #         self.gui.store.dislike_profile(user_id, self.gui.user_id)
 
     def likeAndDislike(self):
         self.page.pack_forget()
