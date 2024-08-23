@@ -1,4 +1,7 @@
 class User:
+    '''
+    User class that stores all associated user features
+    '''
     def __init__(self, username, password, user_id, name, age, gender, location,education, interests, politics, intentions,
                  preferred_genders, age_low, age_high, weights):
         self.user_id = user_id
