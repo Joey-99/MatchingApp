@@ -49,8 +49,7 @@ def generate_random_user_data():
     "North Bay"
 ]
     genders = ['M', 'F', 'O']
-    #preferred_genders_options = ['M', 'F', 'O', 'MF', 'MFO', 'FO']
-    preferred_genders_options = ['MFO']
+    preferred_genders_options = ['M', 'F', 'O', 'MF', 'MFO', 'FO']
     politics = ['L', 'C', 'N']
     intentions = ['S', 'L', 'C', 'LP']
     education_levels = ['highschool', 'college', 'bachelor', 'master', 'phd']
@@ -68,13 +67,15 @@ def generate_random_user_data():
     user_interests = random.sample(interests, k=random.randint(1, 5))  # Choose 1-5 random interests
     politic = random.choice(politics)
     intention = random.choice(intentions)
-    weights = [5,5,5,5,5,5,5]
+    
+    weights = [random.randint(1, 10) for _ in range(6)]
+    weights.append(max(weights))
 
     return username, password, name, age, gender, location, education, preferred_genders, age_low, age_high, user_interests, politic, intention, weights
 
 # Creating 200 user profiles
 created_count = 0
-for i in range(20):
+for i in range(1000):
     username, password, name, age, gender, location, education, preferred_genders, age_low, age_high, user_interests, politic, intention, weights = generate_random_user_data()
     
     if not user_management.check_valid_username(username):
