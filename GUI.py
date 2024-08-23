@@ -1,7 +1,6 @@
 import tkinter
 from tkinter.ttk import Treeview
 
-import Geolocation
 import user_management_new
 from user_management_new import user_management_new
 from tkinter import messagebox, END
@@ -11,6 +10,38 @@ from users import User
 width = 800
 height = 600
 
+ontario_cities = [
+    "Toronto",
+    "Ottawa",
+    "Mississauga",
+    "Brampton",
+    "Hamilton",
+    "London",
+    "Markham",
+    "Vaughan",
+    "Kitchener",
+    "Windsor",
+    "Richmond Hill",
+    "Burlington",
+    "Oshawa",
+    "Greater Sudbury",
+    "Barrie",
+    "Guelph",
+    "Cambridge",
+    "St. Catharines",
+    "Waterloo",
+    "Thunder Bay",
+    "Brantford",
+    "Pickering",
+    "Niagara Falls",
+    "Peterborough",
+    "Sault Ste. Marie",
+    "Sarnia",
+    "Norfolk County",
+    "Welland",
+    "Belleville",
+    "North Bay"
+]
 
 class GUI:
 
@@ -418,7 +449,7 @@ class Register:
         #     'Kitchener',
         #     'Windsor'
         # )
-        self.location_input['values'] = Geolocation.ontario_cities
+        self.location_input['values'] = ontario_cities
         self.location_input.set(self.location_input['values'][0])
         self.location_input.place(
             width=width * 0.3,
