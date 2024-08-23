@@ -5,8 +5,6 @@ import numpy as np
 from users import User
 from matching_helpers import *
 
-DEFAULT_WEIGHTS = np.array([5,5,5,5,5,5,5])
-
 class user_management_new:
     def __init__(self):
         '''
@@ -16,6 +14,7 @@ class user_management_new:
         '''
         self.db_file = 'users.db'
         new_table = self.establish_tables()
+        # sets the user id depending on if it is a new/existing db
         if new_table:
             self.curr_user_id = 0
         else:
@@ -56,6 +55,7 @@ class user_management_new:
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
 
+        # creates the user table with all the necessary fields
         cursor.execute("""CREATE TABLE IF NOT EXISTS users(
                        user_id INTEGER PRIMARY KEY,
                        username TEXT KEY,
@@ -83,6 +83,7 @@ class user_management_new:
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
 
+        # creates the likes and dislikes tables with all the necessary fields
         cursor.execute("""CREATE TABLE IF NOT EXISTS likes(
                        user_id INTEGER KEY,
                        liked_user_id INTEGER KEY)""")
@@ -138,10 +139,12 @@ class user_management_new:
         Populates all the columns in the new row
         '''
         valid = self.check_valid_username(user.username)
+        # processes the interests/weights as strings in order to populate into the table
         interests_string = ','.join(user.interests)
         weights_string = ','.join(map(str, user.weights))
         
         if valid:
+            # adds the user information as a new entry in the user's table
             conn = sqlite3.connect(self.db_file)
             cursor = conn.cursor()
             cursor.execute(f"""INSERT INTO users(user_id,username,password,name,age,gender,location,education,interests,politics,intentions,preferred_genders,age_low,age_high,weights)
@@ -163,6 +166,7 @@ class user_management_new:
         '''
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
+        # deletes the user from the user table, and any entries in likes/dislikes that contains their user_id
         cursor.execute(f"DELETE FROM users WHERE user_id = {user_id}")
         cursor.execute(f"DELETE FROM likes WHERE user_id = {user_id} OR liked_user_id == {user_id}")
         cursor.execute(f"DELETE FROM dislikes WHERE user_id = {user_id} OR disliked_user_id == {user_id}")
@@ -249,8 +253,10 @@ class user_management_new:
                 WHERE user_id = {user_id}
                 """
         u = pd.read_sql_query(query, conn)
+        # processes the interests/weights back into lists
         u['interests'] = u['interests'].apply(lambda x: x.split(',') if x else [])
         u['weights'] = u['weights'].apply(lambda x: list(map(int, x.split(','))) if x else [])
+        # creates a user object
         user = User(u.iloc[0].username, u.iloc[0].password, u.iloc[0].user_id, u.iloc[0]['name'], u.iloc[0].age, u.iloc[0].gender,
                     u.iloc[0].location, u.iloc[0].education, u.iloc[0].interests, u.iloc[0].politics, u.iloc[0].intentions,
                     u.iloc[0].preferred_genders, u.iloc[0].age_low, u.iloc[0].age_high, u.iloc[0].weights)
@@ -258,10 +264,15 @@ class user_management_new:
         return user
 
     def update_user_info(self, user):
+        '''
+        Updates an existing user with any new information that has been provided
+        '''
+        # processes the interests/weights lists into strings
         interests_string = (','.join(list(user.interests)))
         weights_string = ','.join(list(map(str, user.weights)))
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
+        # updates the user's entry with new information
         cursor.execute(f"""UPDATE users
                         SET username = '{user.username}', 
                             password = '{user.password}', 
@@ -288,6 +299,7 @@ class user_management_new:
         Gets all profiles that a user has not seen
         Also ensures the profiles being shown matches the user's preferences
         '''
+        # gets the user's preferred genders, and any likes/dislikes/liked us
         preferred_genders = self.get_preferred_genders(user_id)
         liked_profiles = self.get_liked_profiles(user_id)
         disliked_profiles = self.get_disliked_profiles(user_id)
@@ -296,9 +308,11 @@ class user_management_new:
         all_users = self.get_all_users().copy()
         all_users['interests'] = all_users['interests'].apply(lambda x: x.split(',') if x else [])
         all_users['weights'] = all_users['weights'].apply(lambda x: list(map(int, x.split(','))) if x else [])
+        # gets relevant other user's in order to rank
         actual_user = all_users[all_users['user_id'] == user_id]
         all_users = all_users[all_users['user_id'] != user_id]
 
+        # gets any necessary user features necessary to rank other user's
         age_low = int(actual_user['age_low'].values[0])
         age_high = int(actual_user['age_high'].values[0])
         interests = set(actual_user['interests'].values[0])
@@ -308,9 +322,12 @@ class user_management_new:
         intention = actual_user['intentions'].values[0]
         weights = np.array(actual_user['weights'].values[0])
         
+        # remove any user's not in the preferred genders of the current user
         gender_filtered = all_users[all_users['gender'].isin(preferred_genders)]
+        # remove any user's the current user has already liked/disliked
         seen_filtered = gender_filtered[~gender_filtered['user_id'].isin(liked_profiles + disliked_profiles)]
 
+        # calculates the associated score of each feature
         seen_filtered['age_score'] = seen_filtered['age'].apply(lambda x: get_age_score(x, age_low, age_high))
         seen_filtered['interest_score'] = seen_filtered['interests'].apply(lambda x: get_interests_score(x, interests))
         seen_filtered['location_score'] = seen_filtered['location'].apply(lambda x: get_location_score(x,location))
@@ -319,10 +336,12 @@ class user_management_new:
         seen_filtered['intention_score'] = np.where(seen_filtered['intentions'] == intention, 1, 0)
         seen_filtered['liked_user'] = np.where(seen_filtered['user_id'].isin(liked_us), 1, 0)
 
+        # multiplies the user's scores by the normalized weight vector
         all_scores = seen_filtered[['age_score', 'interest_score', 'location_score', 'education_score', 'politics_score', 'intention_score', 'liked_user']]
         all_scores = np.array(all_scores)
         weighted_score = all_scores @ (weights / np.sum(weights))
         seen_filtered['weighted_score'] = weighted_score
+        # sort the user's potentials in order by their compatability score (highes to lowest)
         seen_filtered = seen_filtered.sort_values(by='weighted_score', ascending=False)
 
         return seen_filtered
@@ -362,27 +381,8 @@ class user_management_new:
         mutual_profiles = all_users[all_users['user_id'].isin(mutual)]
         return mutual_profiles
     
-    def update_field(self, user_id, column_name, column_value, col_type='str'):
+    def number_of_matches(self, user_id):
         '''
-        Updates a particular column for an associated user
+        Function that returns the total number of matches for a user
         '''
-        conn = sqlite3.connect(self.db_file)
-        cursor = conn.cursor()
-        if col_type == 'str':
-            cursor.execute(f"""UPDATE users
-                        SET {column_name} = '{column_value}'
-                        WHERE user_id = {user_id}""")
-        elif col_type == 'int':
-            cursor.execute(f"""UPDATE users
-                        SET {column_name} = {column_value}
-                        WHERE user_id = {user_id}""")
-        conn.commit()
-        conn.close()
-        return True
-
-
-#Test the get_potentials function
-if __name__ == "__main__":
-    user = user_management_new()
-    info = user.get_user_info(3)
-    print(info)
+        return len(self.evaluate_matches(user_id))

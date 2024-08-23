@@ -223,7 +223,11 @@ class LikeAndDislike:
 
         user = users.loc[users.index[0]]
 
+        matches_before = self.gui.store.number_of_matches(self.gui.user_id)
         self.gui.store.like_profile(self.gui.user_id, user['user_id'])
+        matches_after = self.gui.store.number_of_matches(self.gui.user_id)
+        if matches_after > matches_before:
+            messagebox.showerror("Congratulations!!", "You have found a new match!")
 
         self.next()
 
@@ -792,7 +796,7 @@ class Register:
             age = int(self.age_input.get().strip())
         except Exception:
             age = None
-        if age is None or age <= 0 or age > 100:
+        if age is None or age <= 18 or age > 100:
             messagebox.showerror("ERROR", "age is ERROR")
             return
 

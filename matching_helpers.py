@@ -1,26 +1,14 @@
-#from geopy.geocoders import OpenCage
-#from geopy.distance import geodesic
 import json
 
 AGE_THRESHOLD = 3
 
-# def get_coordinates(location, geolocator):
-#     try:
-#         location = geolocator.geocode(location)
-
-#     except Exception:
-#       return "Please input the address in correct format"
-
-#     return (location.latitude, location.longitude)
-
-# def get_distance(location1, location2, geolocator):
-#     coords_1 = get_coordinates(location1, geolocator)
-#     coords_2 = get_coordinates(location2, geolocator)
-#     distance = geodesic(coords_1, coords_2).kilometers
-
-#     return distance
-
 def get_age_score(users_age, age_low, age_high):
+    '''
+    Calculates the age related score
+    Score of 1 if user is within the user's age preferences
+    Score of 0.5 if within AGE_THRESHOLD of the user's age preferences
+    0 otherwise
+    '''
     if users_age >= age_low and users_age <= age_high:
         return 1
     elif users_age < age_low and users_age + AGE_THRESHOLD > age_low:
@@ -31,6 +19,9 @@ def get_age_score(users_age, age_low, age_high):
         return 0
     
 def get_interests_score(users_interests, interests):
+    '''
+    Jaccard similarity for interest score
+    '''
     intersect = len(set(users_interests).intersection(interests))
     union = len(set(users_interests).union(interests))
     return intersect/union
