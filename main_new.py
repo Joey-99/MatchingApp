@@ -301,7 +301,7 @@ if __name__ == '__main__':
 
         while logged_in:
             # provide the user with the available menu options
-            option = input("\nPlease choose an option (browse_profiles OR view_matches OR edit_profile OR logout OR delete_profile): ").lower()
+            option = input("\nPlease choose an option (browse_profiles OR view_matches OR edit_profile OR logout OR delete_profile OR view_all_profiles): ").lower()
             
             if option == 'logout':
                 # if logout - go back to the main login page
@@ -416,3 +416,9 @@ if __name__ == '__main__':
                 
                 # update the user's info in the database
                 user.update_user_info(info)
+
+            elif option == 'view_all_profiles':
+                print(user.get_all_users()[COLUMNS_TO_SHOW])
+
+            else:
+                print('Not a valid entry, please try again.')
