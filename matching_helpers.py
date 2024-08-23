@@ -35,26 +35,32 @@ def get_interests_score(users_interests, interests):
     union = len(set(users_interests).union(interests))
     return intersect/union
 
-
+#The Json file contains the score calculated for each pair of Ontario cities.  
+#The score is calculated by 1/x, x is the distance between two cities in km. 
+#The city pair is ranked by their score value.
 with open('cities_ranked.json', 'r') as json_file:
     distance_score = json.load(json_file)
 
-distance_score_1 = dict(list(distance_score.items())[:87]) # The cut-off line is 80km, run Geolocation.py to see the box-plot and the distribution plot of distances beyond 80km.
+# The cut-off line is 80km, run Geolocation.py to see the box-plot and the distribution plot of distances beyond 80km.
+# The cut-off is intended to seperate the cities that are close to each other (<71km)
+# Give the appropriate weight to the cities that are far from each other (>71km) by normalizing the score.
 
+distance_score_1 = dict(list(distance_score.items())[:87]) 
 distance_score_2 = dict(list(distance_score.items())[87:])
 
 max_score = max(distance_score_2.values())
 min_score = min(distance_score_2.values())
 
+# Normalize the score
 for key in distance_score_2:
     normalized_score = (distance_score_2[key] - min_score) / (max_score - min_score)
     distance_score_2[key] = normalized_score
 
 def get_location_score(users_location, location):
     name_1 = f'{users_location} - {location}'
-    name_2 = f'{location} - {users_location}'
+    name_2 = f'{location} - {users_location}'# Alternative name for city pair
     
-    if users_location == location or name_1 in distance_score_1 or name_2 in distance_score_1:
+    if users_location == location or name_1 in distance_score_1 or name_2 in distance_score_1: # If the two cities are close to each other
         return 1
     else:
         try:
